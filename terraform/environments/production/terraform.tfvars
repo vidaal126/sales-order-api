@@ -1,0 +1,6 @@
+project_name = "sales-order-api"
+environment  = "production"
+aws_region   = "us-east-1"
+github_org   = "vidaal126"
+github_repo  = "sales-order-api"
+cors_origin  = "https://seu-dominio.com"
