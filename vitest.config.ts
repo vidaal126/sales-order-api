@@ -1,14 +1,14 @@
-import swc from 'unplugin-swc';
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from "vitest/config";
+import { resolve } from "path";
 
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'node',
-    root: './',
+    environment: "node",
+    root: "./",
     coverage: {
-      provider: 'v8',
-      include: ['src/**'],
+      provider: "v8",
+      include: ["src/**"],
       thresholds: {
         lines: 80,
         branches: 80,
@@ -17,5 +17,12 @@ export default defineConfig({
       },
     },
   },
-  plugins: [swc.vite({ module: { type: 'nodenext' } })],
+  resolve: {
+    alias: {
+      "@domain": resolve(__dirname, "src/domain"),
+      "@application": resolve(__dirname, "src/application"),
+      "@infrastructure": resolve(__dirname, "src/infrastructure"),
+      "@presentation": resolve(__dirname, "src/presentation"),
+    },
+  },
 });

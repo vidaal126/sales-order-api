@@ -2,12 +2,13 @@ import { Inject, Injectable } from "@nestjs/common";
 import { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
 import { ICustomerRepository } from "@domain/repositories/customer.repository";
 import { IItemRepository } from "@domain/repositories/item.repository";
+import type { IEventEmitter } from "@domain/events/event-emitter.port";
+import { EVENT_EMITTER_PORT } from "@domain/events/event-emitter.port";
 import { SalesOrderEntity } from "@domain/entities/sales-order.entity";
 import { SalesOrderItemEntity } from "@domain/entities/sales-order-item.entity";
 import { OrderStatus } from "@domain/enums/order-status.enum";
 import { DomainException } from "@domain/exceptions/domain.exception";
 import { randomUUID } from "crypto";
-import { EventEmitter2 } from "@nestjs/event-emitter";
 
 export interface CreateSalesOrderInput {
   customerId: string;
@@ -25,8 +26,8 @@ export class CreateSalesOrderUseCase {
     private readonly salesOrderRepository: ISalesOrderRepository,
     private readonly customerRepository: ICustomerRepository,
     private readonly itemRepository: IItemRepository,
-    @Inject(EventEmitter2)
-    private readonly eventEmitter: EventEmitter2,
+    @Inject(EVENT_EMITTER_PORT)
+    private readonly eventEmitter: IEventEmitter,
   ) {}
 
   async execute(input: CreateSalesOrderInput): Promise<SalesOrderEntity> {
