@@ -1,3 +1,4 @@
+import { OrderStatus } from "@domain/enums/order-status.enum";
 import { BaseEntity } from "./base.entity";
 import { SalesOrderItemEntity } from "./sales-order-item.entity";
 import { SchedulingEntity } from "./scheduling.entity";

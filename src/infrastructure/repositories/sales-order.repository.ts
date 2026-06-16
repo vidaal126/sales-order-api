@@ -5,7 +5,7 @@ import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { SchedulingEntity } from '@domain/entities/scheduling.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
-import { Prisma } from '@infrastructure/database/generated';
+import { Prisma } from '../database/generated/client';
 
 type SalesOrderWithRelations = Prisma.SalesOrderGetPayload<{
   include: { items: true; scheduling: true };

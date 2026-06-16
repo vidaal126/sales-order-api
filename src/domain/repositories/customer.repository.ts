@@ -1,9 +1,9 @@
 import { CustomerEntity } from "@domain/entities/customer.entity";
 
 export interface ICustomerRepository {
-  findById(id: string): Promise<CustomerEntity | null>;
+  findById(id: string): Promise<CustomerEntity | undefined>;
   findAll(): Promise<CustomerEntity[]>;
-  findyByDocument(document: string): Promise<CustomerEntity | null>;
-  create(customer: CustomerEntity): Promise<void>;
-  update(customer: CustomerEntity): Promise<void>;
+  findByDocument(document: string): Promise<CustomerEntity | undefined>;
+  create(customer: CustomerEntity): Promise<CustomerEntity>;
+  update(customer: CustomerEntity): Promise<CustomerEntity>;
 }
