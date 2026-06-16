@@ -1,0 +1,26 @@
+enum AuditAction {
+  ORDER_CREATED
+  ORDER_STATUS_CHANGED
+  DELIVERY_SCHEDULED
+  DELIVERY_RESCHEDULED
+  TRANSPORT_CHANGED
+}
+
+model AuditLog {
+  id            String      @id @default(uuid())
+  action        AuditAction
+  entityType    String
+  entityId      String
+  previousState Json?
+  currentState  Json?
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+
+  salesOrderId String?
+  salesOrder   SalesOrder? @relation(fields: [salesOrderId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([salesOrderId])
+  @@map("audit_logs")
+}

@@ -1,0 +1,12 @@
+model Item {
+  id          String   @id @default(uuid())
+  sku         String   @unique
+  name        String
+  description String?
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+
+  orderItems SalesOrderItem[]
+
+  @@map("items")
+}

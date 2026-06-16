@@ -1,0 +1,12 @@
+model TransportType {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customers CustomerTransportType[]
+  orders    SalesOrder[]
+
+  @@map("transport_types")
+}

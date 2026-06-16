@@ -1,0 +1,46 @@
+enum OrderStatus {
+  CRIADA
+  PLANEJADA
+  AGENDADA
+  EM_TRANSPORTE
+  ENTREGUE
+}
+
+model SalesOrder {
+  id              String      @id @default(uuid())
+  status          OrderStatus @default(CRIADA)
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  customerId      String
+  transportTypeId String
+
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  transportType TransportType @relation(fields: [transportTypeId], references: [id])
+
+  items      SalesOrderItem[]
+  scheduling Scheduling?
+  auditLogs  AuditLog[]
+
+  @@index([customerId])
+  @@index([transportTypeId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("sales_orders")
+}
+
+model SalesOrderItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+
+  salesOrderId String
+  itemId       String
+
+  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id])
+  item       Item       @relation(fields: [itemId], references: [id])
+
+  @@unique([salesOrderId, itemId])
+  @@map("sales_order_items")
+}

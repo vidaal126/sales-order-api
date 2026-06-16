@@ -1,0 +1,16 @@
+model Scheduling {
+  id            String    @id @default(uuid())
+  deliveryDate  DateTime  @db.Date
+  windowStart   DateTime  @db.Time
+  windowEnd     DateTime  @db.Time
+  confirmedAt   DateTime?
+  rescheduledAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  salesOrderId String     @unique
+  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id])
+
+  @@index([deliveryDate])
+  @@map("scheduling")
+}

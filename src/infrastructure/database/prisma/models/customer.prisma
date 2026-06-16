@@ -1,0 +1,25 @@
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  document  String   @unique
+  email     String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authorizedTransports CustomerTransportType[]
+  orders               SalesOrder[]
+
+  @@map("customers")
+}
+
+model CustomerTransportType {
+  customerId      String
+  transportTypeId String
+
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  transportType TransportType @relation(fields: [transportTypeId], references: [id])
+
+  @@id([customerId, transportTypeId])
+  @@map("customer_transport_types")
+}
