@@ -1,98 +1,194 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Sales Order API (OVGS)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Sistema de Gestão de Ordens de Venda — API REST para gerenciamento do ciclo completo de Ordens de Venda, desde o cadastro de clientes e itens até o agendamento e rastreabilidade de entregas.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tecnologias
 
-## Description
+- **Runtime:** Node.js 24 + TypeScript
+- **Framework:** NestJS 11 + Fastify
+- **ORM:** Prisma 7
+- **Banco de dados:** PostgreSQL 17
+- **Validação:** class-validator + class-transformer
+- **Documentação:** Swagger / OpenAPI
+- **Testes:** Vitest
+- **Logs:** nestjs-pino (JSON estruturado)
+- **Segurança:** @fastify/helmet, CORS, Throttler
+- **Containerização:** Docker + Docker Compose
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Pré-requisitos
 
-## Project setup
+- Node.js 20+
+- Docker e Docker Compose
+- Yarn
+
+## Como executar
+
+### 1. Clone o repositório
 
 ```bash
-$ yarn install
+git clone https://github.com/vidaal126/sales-order-api.git
+cd sales-order-api
 ```
 
-## Compile and run the project
+### 2. Configure as variáveis de ambiente
 
 ```bash
-# development
-$ yarn run start
-
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+### 3. Suba os containers
 
 ```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+docker compose up -d
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 4. Instale as dependências
 
 ```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+yarn install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 5. Execute as migrations
 
-## Resources
+```bash
+yarn prisma migrate dev
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### 6. Inicie a aplicação
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+yarn start:dev
+```
 
-## Support
+A API estará disponível em `http://localhost:3000`.  
+A documentação Swagger estará disponível em `http://localhost:3000/api/docs`.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Endpoints
 
-## Stay in touch
+| Método | Rota                                | Descrição                    |
+| ------ | ----------------------------------- | ---------------------------- |
+| POST   | `/api/v1/customers`                 | Criar cliente                |
+| GET    | `/api/v1/customers`                 | Listar clientes              |
+| PUT    | `/api/v1/customers/:id`             | Atualizar cliente            |
+| POST   | `/api/v1/transport-types`           | Criar tipo de transporte     |
+| GET    | `/api/v1/transport-types`           | Listar tipos de transporte   |
+| PUT    | `/api/v1/transport-types/:id`       | Atualizar tipo de transporte |
+| POST   | `/api/v1/items`                     | Criar item                   |
+| GET    | `/api/v1/items`                     | Listar itens                 |
+| POST   | `/api/v1/sales-orders`              | Criar ordem de venda         |
+| GET    | `/api/v1/sales-orders`              | Listar ordens (com filtros)  |
+| GET    | `/api/v1/sales-orders/:id`          | Buscar ordem por ID          |
+| PUT    | `/api/v1/sales-orders/:id/status`   | Atualizar status da ordem    |
+| POST   | `/api/v1/sales-orders/:id/schedule` | Agendar entrega              |
+| PUT    | `/api/v1/sales-orders/:id/schedule` | Reagendar entrega            |
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Fluxo operacional da Ordem de Venda
 
-## License
+CRIADA → PLANEJADA → AGENDADA → EM_TRANSPORTE → ENTREGUE
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Transições fora dessa sequência são rejeitadas com HTTP 422.
+
+## Decisões arquiteturais
+
+### Hexagonal Architecture (Ports & Adapters)
+
+O domínio é o núcleo da aplicação e não depende de nenhum detalhe de infraestrutura. Controllers, repositories e serviços externos são adapters que se conectam ao domínio através de interfaces (ports).
+Presentation (Controllers/DTOs)
+
+↓
+
+Application (Use Cases)
+
+↓
+
+Domain (Entities + Interfaces)
+
+↑
+
+Infrastructure (Repositories/Prisma)
+
+Isso significa que é possível trocar Prisma por TypeORM, ou NestJS por Express, sem tocar em nenhuma regra de negócio.
+
+### State Machine para Ordens de Venda
+
+As transições de status da Ordem de Venda são controladas pela própria entidade `SalesOrderEntity` através de um mapa de transições válidas. Qualquer tentativa de transição inválida lança uma `DomainException` antes de chegar no banco de dados.
+
+```typescript
+const VALID_TRANSITIONS = {
+  CRIADA: ["PLANEJADA"],
+  PLANEJADA: ["AGENDADA"],
+  AGENDADA: ["EM_TRANSPORTE"],
+  EM_TRANSPORTE: ["ENTREGUE"],
+  ENTREGUE: [],
+};
+```
+
+### Event-Driven Audit
+
+A auditoria é completamente desacoplada da lógica de negócio. Os Use Cases emitem domain events via `IEventEmitter` (porta de saída), e o `AuditListener` escuta esses eventos e persiste os registros automaticamente — sem que os Use Cases precisem conhecer o `AuditLogRepository`.
+UseCase → emit('order.created') → AuditListener → AuditLogRepository
+
+### Tipos de Transporte como dados
+
+Os tipos de transporte (Caminhão, Carreta, Bi-truck) são cadastrados como dados, não como enums hardcoded. Isso satisfaz o requisito do sistema de permitir a inclusão de novos tipos sem alterar o código.
+
+### Snapshot de preço nos itens da ordem
+
+O `unitPrice` é copiado para `SalesOrderItem` no momento da criação da ordem. Mudanças futuras no preço do item não afetam ordens históricas.
+
+## Estratégia de modelagem do domínio
+
+| Entidade           | Responsabilidade                                                                 |
+| ------------------ | -------------------------------------------------------------------------------- |
+| `CustomerEntity`   | Guarda a lista de transportes autorizados e valida via `isTransportAuthorized()` |
+| `SalesOrderEntity` | Encapsula a state machine de status via `transitionTo()` e `canTransitionTo()`   |
+| `SchedulingEntity` | Controla agendamento e reagendamento de entregas                                 |
+| `AuditLogEntity`   | Registra todos os eventos relevantes com estado anterior e posterior             |
+
+## Estratégia de persistência
+
+- **Prisma 7** com adapter `@prisma/adapter-pg` para conexão direta com PostgreSQL
+- Schema separado por modelo em `src/infrastructure/database/prisma/models/`
+- Índices criados em campos de filtro: `status`, `customerId`, `transportTypeId`, `createdAt`, `deliveryDate`
+- Chave primária composta em `CustomerTransportType` (N:N sem coluna `id` extra)
+
+## Testes
+
+```bash
+# Unitários e integração
+yarn test
+
+# Com cobertura
+yarn test:cov
+```
+
+### Cobertura atual
+
+- **9 testes unitários** — State machine da `SalesOrderEntity`
+- **4 testes unitários** — `CreateSalesOrderUseCase` com mocks
+- **2 testes de integração** — `CreateSalesOrderUseCase` com banco real
+
+## Considerações sobre escalabilidade
+
+A arquitetura está preparada para evoluir sem grandes refatorações:
+
+- **Message broker:** O `IEventEmitter` (porta de saída) pode ser substituído por um adapter RabbitMQ ou Kafka sem alterar os Use Cases
+- **Cache:** Consultas de monitoramento operacional podem receber uma camada Redis nos repositórios sem impacto no domínio
+- **Read model:** O `findAll` com filtros pode ser extraído para um repositório de leitura separado (CQRS)
+- **Microserviços:** Cada módulo (Customer, SalesOrder, Scheduling) pode ser extraído para um serviço independente
+
+## Considerações sobre performance
+
+- Índices criados em todos os campos usados em filtros e joins
+- `findByIds` usa `WHERE id IN (...)` em vez de N queries individuais
+- `include` do Prisma usado estrategicamente para evitar N+1
+
+## Trade-offs assumidos
+
+| Decisão                                 | Trade-off                                                                       |
+| --------------------------------------- | ------------------------------------------------------------------------------- |
+| Prisma Schema separado por arquivo      | Usa `prismaSchemaFolder` (Prisma 7 estável) — sem suporte em versões anteriores |
+| `updatedAt` gerenciado pelo Prisma      | A entidade de domínio reflete o valor persistido, não calcula em memória        |
+| Audit via EventEmitter2 in-process      | Simples e suficiente para o escopo — em produção migraria para broker externo   |
+| Sem paginação nos endpoints de listagem | Fora do escopo do desafio — adicionaria `cursor-based pagination` em produção   |
+| Testes de integração com banco real     | Requer banco rodando — em CI usaria um banco dedicado por pipeline              |
