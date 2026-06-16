@@ -1,9 +1,9 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ISchedulingRepository } from "@domain/repositories/scheduling.repository";
-import type { IEventEmitter } from "@domain/events/event-emitter.port";
-import { EVENT_EMITTER_PORT } from "@domain/events/event-emitter.port";
-import { SchedulingEntity } from "@domain/entities/scheduling.entity";
-import { DomainException } from "@domain/exceptions/domain.exception";
+import { SchedulingEntity } from '@domain/entities/scheduling.entity';
+import type { IEventEmitter } from '@domain/events/event-emitter.port';
+import { EVENT_EMITTER_PORT } from '@domain/events/event-emitter.port';
+import { DomainException } from '@domain/exceptions/domain.exception';
+import { ISchedulingRepository } from '@domain/repositories/scheduling.repository';
+import { Inject, Injectable } from '@nestjs/common';
 
 export interface RescheduleDeliveryInput {
   salesOrderId: string;
@@ -15,25 +15,20 @@ export interface RescheduleDeliveryInput {
 @Injectable()
 export class RescheduleDeliveryUseCase {
   constructor(
+    @Inject(ISchedulingRepository)
     private readonly schedulingRepository: ISchedulingRepository,
     @Inject(EVENT_EMITTER_PORT)
     private readonly eventEmitter: IEventEmitter,
   ) {}
 
   async execute(input: RescheduleDeliveryInput): Promise<SchedulingEntity> {
-    const existing = await this.schedulingRepository.findBySalesOrderId(
-      input.salesOrderId,
-    );
+    const existing = await this.schedulingRepository.findBySalesOrderId(input.salesOrderId);
     if (!existing) {
-      throw new DomainException(
-        `Agendamento para ordem ${input.salesOrderId} não encontrado.`,
-      );
+      throw new DomainException(`Agendamento para ordem ${input.salesOrderId} não encontrado.`);
     }
 
     if (input.windowStart >= input.windowEnd) {
-      throw new DomainException(
-        `Janela de atendimento inválida: início deve ser anterior ao fim.`,
-      );
+      throw new DomainException(`Janela de atendimento inválida: início deve ser anterior ao fim.`);
     }
 
     const previousDate = existing.deliveryDate;
@@ -52,7 +47,7 @@ export class RescheduleDeliveryUseCase {
 
     const saved = await this.schedulingRepository.update(updated);
 
-    this.eventEmitter.emit("order.delivery.rescheduled", {
+    this.eventEmitter.emit('order.delivery.rescheduled', {
       orderId: input.salesOrderId,
       previousDate,
       newDate: saved.deliveryDate,

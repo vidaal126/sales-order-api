@@ -1,14 +1,14 @@
-import { Body, Controller, Get, Param, Post, Put } from "@nestjs/common";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
-import { CreateCustomerUseCase } from "@application/usecases/customer/create-customer.use-case";
-import { UpdateCustomerUseCase } from "@application/usecases/customer/update-customer.use-case";
-import { GetCustomersUseCase } from "@application/usecases/customer/get-customers.use-case";
-import { CreateCustomerDto } from "@presentation/dtos/customer/create-customer.dto";
-import { UpdateCustomerDto } from "@presentation/dtos/customer/update-customer.dto";
-import { CustomerEntity } from "@domain/entities/customer.entity";
+import type { CreateCustomerUseCase } from '@application/usecases/customer/create-customer.use-case';
+import type { GetCustomersUseCase } from '@application/usecases/customer/get-customers.use-case';
+import type { UpdateCustomerUseCase } from '@application/usecases/customer/update-customer.use-case';
+import type { CustomerEntity } from '@domain/entities/customer.entity';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { CreateCustomerDto } from '@presentation/dtos/customer/create-customer.dto';
+import type { UpdateCustomerDto } from '@presentation/dtos/customer/update-customer.dto';
 
-@ApiTags("Customers")
-@Controller("/customers")
+@ApiTags('Customers')
+@Controller('/customers')
 export class CustomersController {
   constructor(
     private readonly createCustomerUseCase: CreateCustomerUseCase,
@@ -17,7 +17,7 @@ export class CustomersController {
   ) {}
 
   @Post()
-  @ApiOperation({ summary: "Criar cliente" })
+  @ApiOperation({ summary: 'Criar cliente' })
   async create(@Body() dto: CreateCustomerDto): Promise<CustomerEntity> {
     return this.createCustomerUseCase.execute({
       name: dto.name,
@@ -28,12 +28,9 @@ export class CustomersController {
     });
   }
 
-  @Put(":id")
-  @ApiOperation({ summary: "Atualizar cliente" })
-  async update(
-    @Param("id") id: string,
-    @Body() dto: UpdateCustomerDto,
-  ): Promise<CustomerEntity> {
+  @Put(':id')
+  @ApiOperation({ summary: 'Atualizar cliente' })
+  async update(@Param('id') id: string, @Body() dto: UpdateCustomerDto): Promise<CustomerEntity> {
     return this.updateCustomerUseCase.execute({
       id,
       name: dto.name,
@@ -44,7 +41,7 @@ export class CustomersController {
   }
 
   @Get()
-  @ApiOperation({ summary: "Listar clientes" })
+  @ApiOperation({ summary: 'Listar clientes' })
   async findAll(): Promise<CustomerEntity[]> {
     return this.getCustomersUseCase.execute();
   }

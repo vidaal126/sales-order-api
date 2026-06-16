@@ -1,20 +1,24 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsPositive } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 
 export class CreateItemDto {
   @ApiProperty({ example: 'SKU-001' })
-  @IsString() @IsNotEmpty()
+  @IsString()
+  @IsNotEmpty()
   sku!: string;
 
   @ApiProperty({ example: 'Caixa de papelão' })
-  @IsString() @IsNotEmpty()
+  @IsString()
+  @IsNotEmpty()
   name!: string;
 
   @ApiPropertyOptional({ example: 'Caixa 50x50x50cm' })
-  @IsString() @IsOptional()
+  @IsString()
+  @IsOptional()
   description?: string;
 
-  @ApiProperty({ example: 29.90 })
-  @IsNumber() @IsPositive()
+  @ApiProperty({ example: 29.9 })
+  @IsNumber()
+  @IsPositive()
   unitPrice!: number;
 }

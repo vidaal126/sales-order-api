@@ -1,6 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsArray, IsUUID, IsInt, IsPositive, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsPositive,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 
 export class CreateSalesOrderItemDto {
   @ApiProperty({ example: 'uuid-do-item' })
@@ -8,7 +16,8 @@ export class CreateSalesOrderItemDto {
   itemId!: string;
 
   @ApiProperty({ example: 2 })
-  @IsInt() @IsPositive()
+  @IsInt()
+  @IsPositive()
   quantity!: number;
 }
 
@@ -22,11 +31,13 @@ export class CreateSalesOrderDto {
   transportTypeId!: string;
 
   @ApiPropertyOptional({ example: 'Entregar no período da manhã' })
-  @IsString() @IsOptional()
+  @IsString()
+  @IsOptional()
   notes?: string;
 
   @ApiProperty({ type: [CreateSalesOrderItemDto] })
-  @IsArray() @ValidateNested({ each: true })
+  @IsArray()
+  @ValidateNested({ each: true })
   @Type((): typeof CreateSalesOrderItemDto => CreateSalesOrderItemDto)
   items!: CreateSalesOrderItemDto[];
 }

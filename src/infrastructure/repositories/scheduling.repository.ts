@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma/prisma.service';
-import { ISchedulingRepository } from '@domain/repositories/scheduling.repository';
 import { SchedulingEntity } from '@domain/entities/scheduling.entity';
+import { ISchedulingRepository } from '@domain/repositories/scheduling.repository';
+import { Inject, Injectable } from '@nestjs/common';
+import { PrismaService } from '../database/prisma/prisma.service';
 
 @Injectable()
 export class SchedulingRepository extends ISchedulingRepository {
-  constructor(private readonly prisma: PrismaService) { super(); }
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {
+    super();
+  }
 
   async findBySalesOrderId(salesOrderId: string): Promise<SchedulingEntity | undefined> {
     const scheduling = await this.prisma.scheduling.findUnique({ where: { salesOrderId } });

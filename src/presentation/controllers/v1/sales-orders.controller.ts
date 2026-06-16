@@ -1,21 +1,21 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
-import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { CreateSalesOrderUseCase } from "@application/usecases/sales-order/create-sales-order.use-case";
-import { UpdateSalesOrderStatusUseCase } from "@application/usecases/sales-order/update-sales-order-status.use-case";
-import { GetSalesOrdersUseCase } from "@application/usecases/sales-order/get-sales-orders.use-case";
-import { GetSalesOrderByIdUseCase } from "@application/usecases/sales-order/get-sales-order-by-id.use-case";
-import { ScheduleDeliveryUseCase } from "@application/usecases/sales-order/schedule-delivery.use-case";
-import { RescheduleDeliveryUseCase } from "@application/usecases/sales-order/reschedule-delivery.use-case";
-import { CreateSalesOrderDto } from "@presentation/dtos/sales-order/create-sales-order.dto";
-import { UpdateSalesOrderStatusDto } from "@presentation/dtos/sales-order/update-sales-order-status.dto";
-import { ScheduleDeliveryDto } from "@presentation/dtos/sales-order/schedule-delivery.dto";
-import { RescheduleDeliveryDto } from "@presentation/dtos/sales-order/reschedule-delivery.dto";
-import { SalesOrderEntity } from "@domain/entities/sales-order.entity";
-import { SchedulingEntity } from "@domain/entities/scheduling.entity";
-import { OrderStatus } from "@domain/enums/order-status.enum";
+import type { CreateSalesOrderUseCase } from '@application/usecases/sales-order/create-sales-order.use-case';
+import type { GetSalesOrderByIdUseCase } from '@application/usecases/sales-order/get-sales-order-by-id.use-case';
+import type { GetSalesOrdersUseCase } from '@application/usecases/sales-order/get-sales-orders.use-case';
+import type { RescheduleDeliveryUseCase } from '@application/usecases/sales-order/reschedule-delivery.use-case';
+import type { ScheduleDeliveryUseCase } from '@application/usecases/sales-order/schedule-delivery.use-case';
+import type { UpdateSalesOrderStatusUseCase } from '@application/usecases/sales-order/update-sales-order-status.use-case';
+import type { SalesOrderEntity } from '@domain/entities/sales-order.entity';
+import type { SchedulingEntity } from '@domain/entities/scheduling.entity';
+import { OrderStatus } from '@domain/enums/order-status.enum';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import type { CreateSalesOrderDto } from '@presentation/dtos/sales-order/create-sales-order.dto';
+import type { RescheduleDeliveryDto } from '@presentation/dtos/sales-order/reschedule-delivery.dto';
+import type { ScheduleDeliveryDto } from '@presentation/dtos/sales-order/schedule-delivery.dto';
+import type { UpdateSalesOrderStatusDto } from '@presentation/dtos/sales-order/update-sales-order-status.dto';
 
-@ApiTags("Sales Orders")
-@Controller("/sales-orders")
+@ApiTags('Sales Orders')
+@Controller('/sales-orders')
 export class SalesOrdersController {
   constructor(
     private readonly createSalesOrderUseCase: CreateSalesOrderUseCase,
@@ -27,7 +27,7 @@ export class SalesOrdersController {
   ) {}
 
   @Post()
-  @ApiOperation({ summary: "Criar ordem de venda" })
+  @ApiOperation({ summary: 'Criar ordem de venda' })
   async create(@Body() dto: CreateSalesOrderDto): Promise<SalesOrderEntity> {
     return this.createSalesOrderUseCase.execute({
       customerId: dto.customerId,
@@ -41,20 +41,20 @@ export class SalesOrdersController {
   }
 
   @Get()
-  @ApiOperation({ summary: "Listar ordens de venda" })
-  @ApiQuery({ name: "status", enum: OrderStatus, required: false })
-  @ApiQuery({ name: "customerId", required: false })
-  @ApiQuery({ name: "transportTypeId", required: false })
-  @ApiQuery({ name: "itemId", required: false })
-  @ApiQuery({ name: "dateFrom", required: false })
-  @ApiQuery({ name: "dateTo", required: false })
+  @ApiOperation({ summary: 'Listar ordens de venda' })
+  @ApiQuery({ name: 'status', enum: OrderStatus, required: false })
+  @ApiQuery({ name: 'customerId', required: false })
+  @ApiQuery({ name: 'transportTypeId', required: false })
+  @ApiQuery({ name: 'itemId', required: false })
+  @ApiQuery({ name: 'dateFrom', required: false })
+  @ApiQuery({ name: 'dateTo', required: false })
   async findAll(
-    @Query("status") status?: OrderStatus,
-    @Query("customerId") customerId?: string,
-    @Query("transportTypeId") transportTypeId?: string,
-    @Query("itemId") itemId?: string,
-    @Query("dateFrom") dateFrom?: string,
-    @Query("dateTo") dateTo?: string,
+    @Query('status') status?: OrderStatus,
+    @Query('customerId') customerId?: string,
+    @Query('transportTypeId') transportTypeId?: string,
+    @Query('itemId') itemId?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
   ): Promise<SalesOrderEntity[]> {
     return this.getSalesOrdersUseCase.execute({
       status,
@@ -66,16 +66,16 @@ export class SalesOrdersController {
     });
   }
 
-  @Get(":id")
-  @ApiOperation({ summary: "Buscar ordem de venda por ID" })
-  async findById(@Param("id") id: string): Promise<SalesOrderEntity> {
+  @Get(':id')
+  @ApiOperation({ summary: 'Buscar ordem de venda por ID' })
+  async findById(@Param('id') id: string): Promise<SalesOrderEntity> {
     return this.getSalesOrderByIdUseCase.execute(id);
   }
 
-  @Put(":id/status")
-  @ApiOperation({ summary: "Atualizar status da ordem de venda" })
+  @Put(':id/status')
+  @ApiOperation({ summary: 'Atualizar status da ordem de venda' })
   async updateStatus(
-    @Param("id") id: string,
+    @Param('id') id: string,
     @Body() dto: UpdateSalesOrderStatusDto,
   ): Promise<SalesOrderEntity> {
     return this.updateSalesOrderStatusUseCase.execute({
@@ -84,10 +84,10 @@ export class SalesOrdersController {
     });
   }
 
-  @Post(":id/schedule")
-  @ApiOperation({ summary: "Agendar entrega" })
+  @Post(':id/schedule')
+  @ApiOperation({ summary: 'Agendar entrega' })
   async schedule(
-    @Param("id") id: string,
+    @Param('id') id: string,
     @Body() dto: ScheduleDeliveryDto,
   ): Promise<SchedulingEntity> {
     return this.scheduleDeliveryUseCase.execute({
@@ -98,10 +98,10 @@ export class SalesOrdersController {
     });
   }
 
-  @Put(":id/schedule")
-  @ApiOperation({ summary: "Reagendar entrega" })
+  @Put(':id/schedule')
+  @ApiOperation({ summary: 'Reagendar entrega' })
   async reschedule(
-    @Param("id") id: string,
+    @Param('id') id: string,
     @Body() dto: RescheduleDeliveryDto,
   ): Promise<SchedulingEntity> {
     return this.rescheduleDeliveryUseCase.execute({

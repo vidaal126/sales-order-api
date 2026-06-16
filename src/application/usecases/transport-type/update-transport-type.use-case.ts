@@ -1,7 +1,7 @@
-import { Injectable } from "@nestjs/common";
-import { ITransportTypeRepository } from "@domain/repositories/transport-type.repository";
-import { TransportTypeEntity } from "@domain/entities/transport-type.entity";
-import { DomainException } from "@domain/exceptions/domain.exception";
+import { TransportTypeEntity } from '@domain/entities/transport-type.entity';
+import { DomainException } from '@domain/exceptions/domain.exception';
+import { ITransportTypeRepository } from '@domain/repositories/transport-type.repository';
+import { Inject, Injectable } from '@nestjs/common';
 
 export interface UpdateTransportTypeInput {
   id: string;
@@ -12,25 +12,20 @@ export interface UpdateTransportTypeInput {
 @Injectable()
 export class UpdateTransportTypeUseCase {
   constructor(
+    @Inject(ITransportTypeRepository)
     private readonly transportTypeRepository: ITransportTypeRepository,
   ) {}
 
   async execute(input: UpdateTransportTypeInput): Promise<TransportTypeEntity> {
     const existing = await this.transportTypeRepository.findById(input.id);
     if (!existing) {
-      throw new DomainException(
-        `Tipo de transporte ${input.id} não encontrado.`,
-      );
+      throw new DomainException(`Tipo de transporte ${input.id} não encontrado.`);
     }
 
     if (input.name && input.name !== existing.name) {
-      const nameConflict = await this.transportTypeRepository.findByName(
-        input.name,
-      );
+      const nameConflict = await this.transportTypeRepository.findByName(input.name);
       if (nameConflict) {
-        throw new DomainException(
-          `Tipo de transporte "${input.name}" já existe.`,
-        );
+        throw new DomainException(`Tipo de transporte "${input.name}" já existe.`);
       }
     }
 

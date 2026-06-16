@@ -1,4 +1,4 @@
-import { CustomerEntity } from "@domain/entities/customer.entity";
+import type { CustomerEntity } from '@domain/entities/customer.entity';
 
 export abstract class ICustomerRepository {
   abstract findById(id: string): Promise<CustomerEntity | undefined>;

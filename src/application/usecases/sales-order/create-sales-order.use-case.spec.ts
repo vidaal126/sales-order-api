@@ -1,14 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { CreateSalesOrderUseCase } from "./create-sales-order.use-case";
-import { CustomerEntity } from "@domain/entities/customer.entity";
-import { ItemEntity } from "@domain/entities/item.entity";
-import { SalesOrderEntity } from "@domain/entities/sales-order.entity";
-import { OrderStatus } from "@domain/enums/order-status.enum";
-import { DomainException } from "@domain/exceptions/domain.exception";
-import type { ICustomerRepository } from "@domain/repositories/customer.repository";
-import type { IItemRepository } from "@domain/repositories/item.repository";
-import type { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
-import type { IEventEmitter } from "@domain/events/event-emitter.port";
+import { CustomerEntity } from '@domain/entities/customer.entity';
+import { ItemEntity } from '@domain/entities/item.entity';
+import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
+import { OrderStatus } from '@domain/enums/order-status.enum';
+import type { IEventEmitter } from '@domain/events/event-emitter.port';
+import { DomainException } from '@domain/exceptions/domain.exception';
+import type { ICustomerRepository } from '@domain/repositories/customer.repository';
+import type { IItemRepository } from '@domain/repositories/item.repository';
+import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CreateSalesOrderUseCase } from './create-sales-order.use-case';
 
 const mockCustomerRepository: ICustomerRepository = {
   findById: vi.fn(),
@@ -39,9 +39,9 @@ const mockEventEmitter: IEventEmitter = {
 
 const makeCustomer = (authorizedTransportTypeIds: string[]): CustomerEntity =>
   new CustomerEntity({
-    id: "customer-id",
-    name: "João Silva",
-    document: "123.456.789-00",
+    id: 'customer-id',
+    name: 'João Silva',
+    document: '123.456.789-00',
     createdAt: new Date(),
     updatedAt: new Date(),
     authorizedTransportTypeIds,
@@ -49,25 +49,25 @@ const makeCustomer = (authorizedTransportTypeIds: string[]): CustomerEntity =>
 
 const makeItem = (): ItemEntity =>
   new ItemEntity({
-    id: "item-id",
-    sku: "SKU-001",
-    name: "Caixa de papelão",
+    id: 'item-id',
+    sku: 'SKU-001',
+    name: 'Caixa de papelão',
     unitPrice: 29.9,
     createdAt: new Date(),
   });
 
 const makeOrder = (): SalesOrderEntity =>
   new SalesOrderEntity({
-    id: "order-id",
-    customerId: "customer-id",
-    transportTypeId: "transport-id",
+    id: 'order-id',
+    customerId: 'customer-id',
+    transportTypeId: 'transport-id',
     status: OrderStatus.CRIADA,
     createdAt: new Date(),
     updatedAt: new Date(),
     items: [],
   });
 
-describe("CreateSalesOrderUseCase", (): void => {
+describe('CreateSalesOrderUseCase', (): void => {
   let useCase: CreateSalesOrderUseCase;
 
   beforeEach((): void => {
@@ -80,64 +80,55 @@ describe("CreateSalesOrderUseCase", (): void => {
     );
   });
 
-  it("should throw DomainException when customer not found", async (): Promise<void> => {
+  it('should throw DomainException when customer not found', async (): Promise<void> => {
     vi.mocked(mockCustomerRepository.findById).mockResolvedValue(undefined);
 
     await expect(
       useCase.execute({
-        customerId: "non-existent",
-        transportTypeId: "transport-id",
-        items: [{ itemId: "item-id", quantity: 1 }],
+        customerId: 'non-existent',
+        transportTypeId: 'transport-id',
+        items: [{ itemId: 'item-id', quantity: 1 }],
       }),
     ).rejects.toThrow(DomainException);
   });
 
-  it("should throw DomainException when transport not authorized for customer", async (): Promise<void> => {
-    vi.mocked(mockCustomerRepository.findById).mockResolvedValue(
-      makeCustomer([]),
-    );
+  it('should throw DomainException when transport not authorized for customer', async (): Promise<void> => {
+    vi.mocked(mockCustomerRepository.findById).mockResolvedValue(makeCustomer([]));
 
     await expect(
       useCase.execute({
-        customerId: "customer-id",
-        transportTypeId: "unauthorized-transport",
-        items: [{ itemId: "item-id", quantity: 1 }],
+        customerId: 'customer-id',
+        transportTypeId: 'unauthorized-transport',
+        items: [{ itemId: 'item-id', quantity: 1 }],
       }),
     ).rejects.toThrow(DomainException);
   });
 
-  it("should throw DomainException when item not found", async (): Promise<void> => {
-    vi.mocked(mockCustomerRepository.findById).mockResolvedValue(
-      makeCustomer(["transport-id"]),
-    );
+  it('should throw DomainException when item not found', async (): Promise<void> => {
+    vi.mocked(mockCustomerRepository.findById).mockResolvedValue(makeCustomer(['transport-id']));
     vi.mocked(mockItemRepository.findByIds).mockResolvedValue([]);
 
     await expect(
       useCase.execute({
-        customerId: "customer-id",
-        transportTypeId: "transport-id",
-        items: [{ itemId: "non-existent-item", quantity: 1 }],
+        customerId: 'customer-id',
+        transportTypeId: 'transport-id',
+        items: [{ itemId: 'non-existent-item', quantity: 1 }],
       }),
     ).rejects.toThrow(DomainException);
   });
 
-  it("should create order and emit event when all validations pass", async (): Promise<void> => {
-    vi.mocked(mockCustomerRepository.findById).mockResolvedValue(
-      makeCustomer(["transport-id"]),
-    );
+  it('should create order and emit event when all validations pass', async (): Promise<void> => {
+    vi.mocked(mockCustomerRepository.findById).mockResolvedValue(makeCustomer(['transport-id']));
     vi.mocked(mockItemRepository.findByIds).mockResolvedValue([makeItem()]);
     vi.mocked(mockSalesOrderRepository.create).mockResolvedValue(makeOrder());
 
     await useCase.execute({
-      customerId: "customer-id",
-      transportTypeId: "transport-id",
-      items: [{ itemId: "item-id", quantity: 2 }],
+      customerId: 'customer-id',
+      transportTypeId: 'transport-id',
+      items: [{ itemId: 'item-id', quantity: 2 }],
     });
 
     expect(mockSalesOrderRepository.create).toHaveBeenCalledOnce();
-    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
-      "order.created",
-      expect.any(Object),
-    );
+    expect(mockEventEmitter.emit).toHaveBeenCalledWith('order.created', expect.any(Object));
   });
 });

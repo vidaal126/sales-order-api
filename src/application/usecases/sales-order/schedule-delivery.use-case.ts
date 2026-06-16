@@ -1,12 +1,12 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
-import { ISchedulingRepository } from "@domain/repositories/scheduling.repository";
-import type { IEventEmitter } from "@domain/events/event-emitter.port";
-import { EVENT_EMITTER_PORT } from "@domain/events/event-emitter.port";
-import { SchedulingEntity } from "@domain/entities/scheduling.entity";
-import { OrderStatus } from "@domain/enums/order-status.enum";
-import { DomainException } from "@domain/exceptions/domain.exception";
-import { randomUUID } from "crypto";
+import { randomUUID } from 'node:crypto';
+import { SchedulingEntity } from '@domain/entities/scheduling.entity';
+import { OrderStatus } from '@domain/enums/order-status.enum';
+import type { IEventEmitter } from '@domain/events/event-emitter.port';
+import { EVENT_EMITTER_PORT } from '@domain/events/event-emitter.port';
+import { DomainException } from '@domain/exceptions/domain.exception';
+import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
+import { ISchedulingRepository } from '@domain/repositories/scheduling.repository';
+import { Inject, Injectable } from '@nestjs/common';
 
 export interface ScheduleDeliveryInput {
   salesOrderId: string;
@@ -18,7 +18,9 @@ export interface ScheduleDeliveryInput {
 @Injectable()
 export class ScheduleDeliveryUseCase {
   constructor(
+    @Inject(ISalesOrderRepository)
     private readonly salesOrderRepository: ISalesOrderRepository,
+    @Inject(ISchedulingRepository)
     private readonly schedulingRepository: ISchedulingRepository,
     @Inject(EVENT_EMITTER_PORT)
     private readonly eventEmitter: IEventEmitter,
@@ -27,9 +29,7 @@ export class ScheduleDeliveryUseCase {
   async execute(input: ScheduleDeliveryInput): Promise<SchedulingEntity> {
     const order = await this.salesOrderRepository.findById(input.salesOrderId);
     if (!order) {
-      throw new DomainException(
-        `Ordem de venda ${input.salesOrderId} não encontrada.`,
-      );
+      throw new DomainException(`Ordem de venda ${input.salesOrderId} não encontrada.`);
     }
 
     if (!order.canTransitionTo(OrderStatus.AGENDADA)) {
@@ -38,19 +38,13 @@ export class ScheduleDeliveryUseCase {
       );
     }
 
-    const existing = await this.schedulingRepository.findBySalesOrderId(
-      input.salesOrderId,
-    );
+    const existing = await this.schedulingRepository.findBySalesOrderId(input.salesOrderId);
     if (existing) {
-      throw new DomainException(
-        `Ordem de venda ${input.salesOrderId} já possui agendamento.`,
-      );
+      throw new DomainException(`Ordem de venda ${input.salesOrderId} já possui agendamento.`);
     }
 
     if (input.windowStart >= input.windowEnd) {
-      throw new DomainException(
-        `Janela de atendimento inválida: início deve ser anterior ao fim.`,
-      );
+      throw new DomainException(`Janela de atendimento inválida: início deve ser anterior ao fim.`);
     }
 
     const scheduling = new SchedulingEntity({
@@ -69,7 +63,7 @@ export class ScheduleDeliveryUseCase {
     order.transitionTo(OrderStatus.AGENDADA);
     await this.salesOrderRepository.update(order);
 
-    this.eventEmitter.emit("order.delivery.scheduled", {
+    this.eventEmitter.emit('order.delivery.scheduled', {
       orderId: order.id,
       schedulingId: created.id,
       deliveryDate: created.deliveryDate,

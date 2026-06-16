@@ -1,14 +1,14 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
-import { ICustomerRepository } from "@domain/repositories/customer.repository";
-import { IItemRepository } from "@domain/repositories/item.repository";
-import type { IEventEmitter } from "@domain/events/event-emitter.port";
-import { EVENT_EMITTER_PORT } from "@domain/events/event-emitter.port";
-import { SalesOrderEntity } from "@domain/entities/sales-order.entity";
-import { SalesOrderItemEntity } from "@domain/entities/sales-order-item.entity";
-import { OrderStatus } from "@domain/enums/order-status.enum";
-import { DomainException } from "@domain/exceptions/domain.exception";
-import { randomUUID } from "crypto";
+import { randomUUID } from 'node:crypto';
+import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
+import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
+import { OrderStatus } from '@domain/enums/order-status.enum';
+import type { IEventEmitter } from '@domain/events/event-emitter.port';
+import { EVENT_EMITTER_PORT } from '@domain/events/event-emitter.port';
+import { DomainException } from '@domain/exceptions/domain.exception';
+import { ICustomerRepository } from '@domain/repositories/customer.repository';
+import { IItemRepository } from '@domain/repositories/item.repository';
+import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
+import { Inject, Injectable } from '@nestjs/common';
 
 export interface CreateSalesOrderInput {
   customerId: string;
@@ -23,8 +23,11 @@ export interface CreateSalesOrderInput {
 @Injectable()
 export class CreateSalesOrderUseCase {
   constructor(
+    @Inject(ISalesOrderRepository)
     private readonly salesOrderRepository: ISalesOrderRepository,
+    @Inject(ICustomerRepository)
     private readonly customerRepository: ICustomerRepository,
+    @Inject(IItemRepository)
     private readonly itemRepository: IItemRepository,
     @Inject(EVENT_EMITTER_PORT)
     private readonly eventEmitter: IEventEmitter,
@@ -48,11 +51,14 @@ export class CreateSalesOrderUseCase {
     if (foundItems.length !== itemIds.length) {
       const foundIds = foundItems.map((i): string => i.id);
       const missing = itemIds.filter((id): boolean => !foundIds.includes(id));
-      throw new DomainException(`Itens não encontrados: ${missing.join(", ")}`);
+      throw new DomainException(`Itens não encontrados: ${missing.join(', ')}`);
     }
 
     const orderItems = input.items.map((inputItem): SalesOrderItemEntity => {
-      const item = foundItems.find((i): boolean => i.id === inputItem.itemId)!;
+      const item = foundItems.find((i): boolean => i.id === inputItem.itemId);
+      if (!item) {
+        throw new DomainException(`Item ${inputItem.itemId} não encontrado.`);
+      }
       return new SalesOrderItemEntity({
         itemId: item.id,
         quantity: inputItem.quantity,
@@ -73,7 +79,7 @@ export class CreateSalesOrderUseCase {
 
     const created = await this.salesOrderRepository.create(order);
 
-    this.eventEmitter.emit("order.created", {
+    this.eventEmitter.emit('order.created', {
       orderId: created.id,
       customerId: created.customerId,
       status: created.status,

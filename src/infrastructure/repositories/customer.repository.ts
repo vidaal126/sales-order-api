@@ -1,20 +1,18 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../database/prisma/prisma.service";
-import { ICustomerRepository } from "@domain/repositories/customer.repository";
-import { CustomerEntity } from "@domain/entities/customer.entity";
+import { CustomerEntity } from '@domain/entities/customer.entity';
+import type { ICustomerRepository } from '@domain/repositories/customer.repository';
+import { Inject, Injectable } from '@nestjs/common';
+import { PrismaService } from '../database/prisma/prisma.service';
 
 @Injectable()
-export class CustomerRepository extends ICustomerRepository {
-  constructor(private readonly prisma: PrismaService) { super(); }
+export class CustomerRepository implements ICustomerRepository {
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<CustomerEntity | undefined> {
     const customer = await this.prisma.customer.findUnique({
       where: { id },
       include: { authorizedTransports: true },
     });
-
     if (!customer) return undefined;
-
     return new CustomerEntity({
       id: customer.id,
       name: customer.name,
@@ -24,7 +22,7 @@ export class CustomerRepository extends ICustomerRepository {
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
       authorizedTransportTypeIds: customer.authorizedTransports.map(
-        (t) => t.transportTypeId,
+        (t): string => t.transportTypeId,
       ),
     });
   }
@@ -34,9 +32,7 @@ export class CustomerRepository extends ICustomerRepository {
       where: { document },
       include: { authorizedTransports: true },
     });
-
     if (!customer) return undefined;
-
     return new CustomerEntity({
       id: customer.id,
       name: customer.name,
@@ -46,7 +42,7 @@ export class CustomerRepository extends ICustomerRepository {
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
       authorizedTransportTypeIds: customer.authorizedTransports.map(
-        (t) => t.transportTypeId,
+        (t): string => t.transportTypeId,
       ),
     });
   }
@@ -55,9 +51,8 @@ export class CustomerRepository extends ICustomerRepository {
     const customers = await this.prisma.customer.findMany({
       include: { authorizedTransports: true },
     });
-
     return customers.map(
-      (customer) =>
+      (customer): CustomerEntity =>
         new CustomerEntity({
           id: customer.id,
           name: customer.name,
@@ -67,7 +62,7 @@ export class CustomerRepository extends ICustomerRepository {
           createdAt: customer.createdAt,
           updatedAt: customer.updatedAt,
           authorizedTransportTypeIds: customer.authorizedTransports.map(
-            (t) => t.transportTypeId,
+            (t): string => t.transportTypeId,
           ),
         }),
     );
@@ -83,7 +78,7 @@ export class CustomerRepository extends ICustomerRepository {
         phone: customer.phone,
         authorizedTransports: {
           create: customer.authorizedTransportTypeIds.map(
-            (transportTypeId) => ({
+            (transportTypeId): { transportTypeId: string } => ({
               transportTypeId,
             }),
           ),
@@ -91,7 +86,6 @@ export class CustomerRepository extends ICustomerRepository {
       },
       include: { authorizedTransports: true },
     });
-
     return new CustomerEntity({
       id: created.id,
       name: created.name,
@@ -101,7 +95,7 @@ export class CustomerRepository extends ICustomerRepository {
       createdAt: created.createdAt,
       updatedAt: created.updatedAt,
       authorizedTransportTypeIds: created.authorizedTransports.map(
-        (t) => t.transportTypeId,
+        (t): string => t.transportTypeId,
       ),
     });
   }
@@ -116,7 +110,7 @@ export class CustomerRepository extends ICustomerRepository {
         authorizedTransports: {
           deleteMany: {},
           create: customer.authorizedTransportTypeIds.map(
-            (transportTypeId) => ({
+            (transportTypeId): { transportTypeId: string } => ({
               transportTypeId,
             }),
           ),
@@ -124,7 +118,6 @@ export class CustomerRepository extends ICustomerRepository {
       },
       include: { authorizedTransports: true },
     });
-
     return new CustomerEntity({
       id: updated.id,
       name: updated.name,
@@ -134,7 +127,7 @@ export class CustomerRepository extends ICustomerRepository {
       createdAt: updated.createdAt,
       updatedAt: updated.updatedAt,
       authorizedTransportTypeIds: updated.authorizedTransports.map(
-        (t) => t.transportTypeId,
+        (t): string => t.transportTypeId,
       ),
     });
   }

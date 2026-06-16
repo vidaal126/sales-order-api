@@ -1,10 +1,13 @@
-import { Injectable } from "@nestjs/common";
-import { ITransportTypeRepository } from "@domain/repositories/transport-type.repository";
-import { TransportTypeEntity } from "@domain/entities/transport-type.entity";
+import type { TransportTypeEntity } from '@domain/entities/transport-type.entity';
+import { ITransportTypeRepository } from '@domain/repositories/transport-type.repository';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetTransportTypesUseCase {
-  constructor(private readonly transportTypeRepository: ITransportTypeRepository) {}
+  constructor(
+    @Inject(ITransportTypeRepository)
+    private readonly transportTypeRepository: ITransportTypeRepository,
+  ) {}
 
   async execute(): Promise<TransportTypeEntity[]> {
     return this.transportTypeRepository.findAll();

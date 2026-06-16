@@ -1,8 +1,8 @@
-import { OrderStatus } from "@domain/enums/order-status.enum";
-import { BaseEntity } from "./base.entity";
-import { SalesOrderItemEntity } from "./sales-order-item.entity";
-import { SchedulingEntity } from "./scheduling.entity";
-import { DomainException } from "../exceptions/domain.exception";
+import { OrderStatus } from '@domain/enums/order-status.enum';
+import { DomainException } from '../exceptions/domain.exception';
+import { BaseEntity } from './base.entity';
+import type { SalesOrderItemEntity } from './sales-order-item.entity';
+import type { SchedulingEntity } from './scheduling.entity';
 
 const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.CRIADA]: [OrderStatus.PLANEJADA],
@@ -52,7 +52,7 @@ export class SalesOrderEntity extends BaseEntity {
     if (!allowed.includes(newStatus)) {
       throw new DomainException(
         `Transição inválida: ${this._status} → ${newStatus}. ` +
-          `Transições permitidas: ${allowed.join(", ") || "nenhuma"}`,
+          `Transições permitidas: ${allowed.join(', ') || 'nenhuma'}`,
       );
     }
     this._status = newStatus;

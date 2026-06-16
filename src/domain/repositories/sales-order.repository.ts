@@ -1,5 +1,5 @@
-import { OrderStatus } from "@domain/enums/order-status.enum";
-import { SalesOrderEntity } from "@domain/entities/sales-order.entity";
+import type { SalesOrderEntity } from '@domain/entities/sales-order.entity';
+import type { OrderStatus } from '@domain/enums/order-status.enum';
 
 export interface SalesOrderFilters {
   status?: OrderStatus;

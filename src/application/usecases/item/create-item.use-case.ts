@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { IItemRepository } from "@domain/repositories/item.repository";
-import { ItemEntity } from "@domain/entities/item.entity";
-import { DomainException } from "@domain/exceptions/domain.exception";
-import { randomUUID } from "crypto";
+import { randomUUID } from 'node:crypto';
+import { ItemEntity } from '@domain/entities/item.entity';
+import { DomainException } from '@domain/exceptions/domain.exception';
+import { IItemRepository } from '@domain/repositories/item.repository';
+import { Inject, Injectable } from '@nestjs/common';
 
 export interface CreateItemInput {
   sku: string;
@@ -13,7 +13,7 @@ export interface CreateItemInput {
 
 @Injectable()
 export class CreateItemUseCase {
-  constructor(private readonly itemRepository: IItemRepository) {}
+  constructor(@Inject(IItemRepository) private readonly itemRepository: IItemRepository) {}
 
   async execute(input: CreateItemInput): Promise<ItemEntity> {
     const existing = await this.itemRepository.findBySku(input.sku);

@@ -1,19 +1,21 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { Test, TestingModule } from "@nestjs/testing";
-import { EventEmitterModule, EventEmitter2 } from "@nestjs/event-emitter";
-import { ConfigModule } from "@nestjs/config";
-import { CreateSalesOrderUseCase } from "./create-sales-order.use-case";
-import { CustomerRepository } from "@infrastructure/repositories/customer.repository";
-import { ItemRepository } from "@infrastructure/repositories/item.repository";
-import { SalesOrderRepository } from "@infrastructure/repositories/sales-order.repository";
-import { TransportTypeRepository } from "@infrastructure/repositories/transport-type.repository";
-import { PrismaService } from "@infrastructure/database/prisma/prisma.service";
-import { OrderStatus } from "@domain/enums/order-status.enum";
-import { DomainException } from "@domain/exceptions/domain.exception";
-import { EVENT_EMITTER_PORT } from "@domain/events/event-emitter.port";
-import { randomUUID } from "crypto";
+import { randomUUID } from 'node:crypto';
+import { OrderStatus } from '@domain/enums/order-status.enum';
+import { EVENT_EMITTER_PORT } from '@domain/events/event-emitter.port';
+import { DomainException } from '@domain/exceptions/domain.exception';
+import { ICustomerRepository } from '@domain/repositories/customer.repository';
+import { IItemRepository } from '@domain/repositories/item.repository';
+import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
+import { PrismaService } from '@infrastructure/database/prisma/prisma.service';
+import { CustomerRepository } from '@infrastructure/repositories/customer.repository';
+import { ItemRepository } from '@infrastructure/repositories/item.repository';
+import { SalesOrderRepository } from '@infrastructure/repositories/sales-order.repository';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
+import { Test, type TestingModule } from '@nestjs/testing';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { CreateSalesOrderUseCase } from './create-sales-order.use-case';
 
-describe("CreateSalesOrderUseCase - Integration", (): void => {
+describe('CreateSalesOrderUseCase - Integration', (): void => {
   let module: TestingModule;
   let useCase: CreateSalesOrderUseCase;
   let prisma: PrismaService;
@@ -23,73 +25,47 @@ describe("CreateSalesOrderUseCase - Integration", (): void => {
 
   beforeAll(async (): Promise<void> => {
     module = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
-        EventEmitterModule.forRoot(),
-      ],
+      imports: [ConfigModule.forRoot({ isGlobal: true }), EventEmitterModule.forRoot()],
       providers: [
-        PrismaService,
-        CustomerRepository,
-        ItemRepository,
-        SalesOrderRepository,
-        TransportTypeRepository,
+        ConfigService,
         {
-          provide: CreateSalesOrderUseCase,
-          useFactory: (
-            salesOrderRepo: SalesOrderRepository,
-            customerRepo: CustomerRepository,
-            itemRepo: ItemRepository,
-            eventEmitter: EventEmitter2,
-          ): CreateSalesOrderUseCase =>
-            new CreateSalesOrderUseCase(
-              salesOrderRepo,
-              customerRepo,
-              itemRepo,
-              eventEmitter,
-            ),
-          inject: [
-            SalesOrderRepository,
-            CustomerRepository,
-            ItemRepository,
-            EventEmitter2,
-          ],
+          provide: PrismaService,
+          useFactory: async (config: ConfigService): Promise<PrismaService> => {
+            const service = new PrismaService(config);
+            await service.onModuleInit();
+            return service;
+          },
+          inject: [ConfigService],
         },
+        { provide: ICustomerRepository, useClass: CustomerRepository },
+        { provide: IItemRepository, useClass: ItemRepository },
+        { provide: ISalesOrderRepository, useClass: SalesOrderRepository },
         { provide: EVENT_EMITTER_PORT, useExisting: EventEmitter2 },
+        CreateSalesOrderUseCase,
       ],
     }).compile();
 
     useCase = module.get(CreateSalesOrderUseCase);
     prisma = module.get(PrismaService);
-    await prisma.$connect();
 
     transportTypeId = randomUUID();
     await prisma.transportType.create({
-      data: {
-        id: transportTypeId,
-        name: `Caminhão-${transportTypeId}`,
-      },
+      data: { id: transportTypeId, name: `Caminhão-${transportTypeId}` },
     });
 
     customerId = randomUUID();
     await prisma.customer.create({
       data: {
         id: customerId,
-        name: "Cliente Teste",
+        name: 'Cliente Teste',
         document: `doc-${customerId}`,
-        authorizedTransports: {
-          create: [{ transportTypeId }],
-        },
+        authorizedTransports: { create: [{ transportTypeId }] },
       },
     });
 
     itemId = randomUUID();
     await prisma.item.create({
-      data: {
-        id: itemId,
-        sku: `SKU-${itemId}`,
-        name: "Item Teste",
-        unitPrice: 10,
-      },
+      data: { id: itemId, sku: `SKU-${itemId}`, name: 'Item Teste', unitPrice: 10 },
     });
   });
 
@@ -105,7 +81,7 @@ describe("CreateSalesOrderUseCase - Integration", (): void => {
     await module.close();
   });
 
-  it("should create a sales order successfully", async (): Promise<void> => {
+  it('should create a sales order successfully', async (): Promise<void> => {
     const order = await useCase.execute({
       customerId,
       transportTypeId,
@@ -118,7 +94,7 @@ describe("CreateSalesOrderUseCase - Integration", (): void => {
     expect(order.items).toHaveLength(1);
   });
 
-  it("should throw DomainException when transport not authorized", async (): Promise<void> => {
+  it('should throw DomainException when transport not authorized', async (): Promise<void> => {
     await expect(
       useCase.execute({
         customerId,

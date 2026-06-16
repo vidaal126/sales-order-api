@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma/prisma.service';
-import { ISalesOrderRepository, SalesOrderFilters } from '@domain/repositories/sales-order.repository';
 import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { SchedulingEntity } from '@domain/entities/scheduling.entity';
-import { OrderStatus } from '@domain/enums/order-status.enum';
-import { Prisma } from '../database/generated/client';
+import type { OrderStatus } from '@domain/enums/order-status.enum';
+import {
+  ISalesOrderRepository,
+  type SalesOrderFilters,
+} from '@domain/repositories/sales-order.repository';
+import { Inject, Injectable } from '@nestjs/common';
+import type { Prisma } from '../database/generated/client';
+import { PrismaService } from '../database/prisma/prisma.service';
 
 type SalesOrderWithRelations = Prisma.SalesOrderGetPayload<{
   include: { items: true; scheduling: true };
@@ -13,7 +16,9 @@ type SalesOrderWithRelations = Prisma.SalesOrderGetPayload<{
 
 @Injectable()
 export class SalesOrderRepository extends ISalesOrderRepository {
-  constructor(private readonly prisma: PrismaService) { super(); }
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {
+    super();
+  }
 
   private toDomain(raw: SalesOrderWithRelations): SalesOrderEntity {
     return new SalesOrderEntity({
@@ -24,25 +29,35 @@ export class SalesOrderRepository extends ISalesOrderRepository {
       notes: raw.notes ?? undefined,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
-      items: raw.items.map((item: SalesOrderWithRelations['items'][number]): SalesOrderItemEntity =>
-        new SalesOrderItemEntity({ itemId: item.itemId, quantity: item.quantity, unitPrice: Number(item.unitPrice) }),
+      items: raw.items.map(
+        (item: SalesOrderWithRelations['items'][number]): SalesOrderItemEntity =>
+          new SalesOrderItemEntity({
+            itemId: item.itemId,
+            quantity: item.quantity,
+            unitPrice: Number(item.unitPrice),
+          }),
       ),
-      scheduling: raw.scheduling ? new SchedulingEntity({
-        id: raw.scheduling.id,
-        salesOrderId: raw.scheduling.salesOrderId,
-        deliveryDate: raw.scheduling.deliveryDate,
-        windowStart: raw.scheduling.windowStart,
-        windowEnd: raw.scheduling.windowEnd,
-        confirmedAt: raw.scheduling.confirmedAt ?? undefined,
-        rescheduledAt: raw.scheduling.rescheduledAt ?? undefined,
-        createdAt: raw.scheduling.createdAt,
-        updatedAt: raw.scheduling.updatedAt,
-      }) : undefined,
+      scheduling: raw.scheduling
+        ? new SchedulingEntity({
+            id: raw.scheduling.id,
+            salesOrderId: raw.scheduling.salesOrderId,
+            deliveryDate: raw.scheduling.deliveryDate,
+            windowStart: raw.scheduling.windowStart,
+            windowEnd: raw.scheduling.windowEnd,
+            confirmedAt: raw.scheduling.confirmedAt ?? undefined,
+            rescheduledAt: raw.scheduling.rescheduledAt ?? undefined,
+            createdAt: raw.scheduling.createdAt,
+            updatedAt: raw.scheduling.updatedAt,
+          })
+        : undefined,
     });
   }
 
   async findById(id: string): Promise<SalesOrderEntity | undefined> {
-    const order = await this.prisma.salesOrder.findUnique({ where: { id }, include: { items: true, scheduling: true } });
+    const order = await this.prisma.salesOrder.findUnique({
+      where: { id },
+      include: { items: true, scheduling: true },
+    });
     if (!order) return undefined;
     return this.toDomain(order);
   }
@@ -70,7 +85,15 @@ export class SalesOrderRepository extends ISalesOrderRepository {
         transportTypeId: order.transportTypeId,
         status: order.status,
         notes: order.notes,
-        items: { create: order.items.map((item): { itemId: string; quantity: number; unitPrice: number } => ({ itemId: item.itemId, quantity: item.quantity, unitPrice: item.unitPrice })) },
+        items: {
+          create: order.items.map(
+            (item): { itemId: string; quantity: number; unitPrice: number } => ({
+              itemId: item.itemId,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+            }),
+          ),
+        },
       },
       include: { items: true, scheduling: true },
     });

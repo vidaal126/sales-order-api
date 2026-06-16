@@ -1,4 +1,4 @@
-import { ItemEntity } from '@domain/entities/item.entity';
+import type { ItemEntity } from '@domain/entities/item.entity';
 
 export abstract class IItemRepository {
   abstract findById(id: string): Promise<ItemEntity | undefined>;

@@ -1,4 +1,4 @@
-import { TransportTypeEntity } from '@domain/entities/transport-type.entity';
+import type { TransportTypeEntity } from '@domain/entities/transport-type.entity';
 
 export abstract class ITransportTypeRepository {
   abstract findById(id: string): Promise<TransportTypeEntity | undefined>;

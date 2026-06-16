@@ -1,12 +1,14 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateTransportTypeDto {
   @ApiPropertyOptional({ example: 'Caminhão' })
-  @IsString() @IsOptional()
+  @IsString()
+  @IsOptional()
   name?: string;
 
   @ApiPropertyOptional({ example: 'Caminhão de médio porte' })
-  @IsString() @IsOptional()
+  @IsString()
+  @IsOptional()
   description?: string;
 }

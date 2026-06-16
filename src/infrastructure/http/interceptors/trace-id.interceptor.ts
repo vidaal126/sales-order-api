@@ -1,7 +1,12 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { randomUUID } from 'crypto';
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import { randomUUID } from 'node:crypto';
+import {
+  type CallHandler,
+  type ExecutionContext,
+  Injectable,
+  type NestInterceptor,
+} from '@nestjs/common';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { Observable } from 'rxjs';
 
 export interface RequestWithTrace extends FastifyRequest {
   traceId?: string;

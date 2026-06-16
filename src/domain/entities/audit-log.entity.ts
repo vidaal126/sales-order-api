@@ -1,4 +1,4 @@
-import { AuditAction } from '../enums/audit-action.enum';
+import type { AuditAction } from '../enums/audit-action.enum';
 
 export class AuditLogEntity {
   readonly id: string;

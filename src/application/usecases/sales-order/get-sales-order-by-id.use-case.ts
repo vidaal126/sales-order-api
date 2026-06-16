@@ -1,11 +1,13 @@
-import { Injectable } from "@nestjs/common";
-import { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
-import { SalesOrderEntity } from "@domain/entities/sales-order.entity";
-import { DomainException } from "@domain/exceptions/domain.exception";
+import type { SalesOrderEntity } from '@domain/entities/sales-order.entity';
+import { DomainException } from '@domain/exceptions/domain.exception';
+import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetSalesOrderByIdUseCase {
-  constructor(private readonly salesOrderRepository: ISalesOrderRepository) {}
+  constructor(
+    @Inject(ISalesOrderRepository) private readonly salesOrderRepository: ISalesOrderRepository,
+  ) {}
 
   async execute(id: string): Promise<SalesOrderEntity> {
     const order = await this.salesOrderRepository.findById(id);

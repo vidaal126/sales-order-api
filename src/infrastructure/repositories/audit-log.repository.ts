@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma/prisma.service';
-import { IAuditLogRepository } from '@domain/repositories/audit-log.repository';
 import { AuditLogEntity } from '@domain/entities/audit-log.entity';
-import { AuditAction } from '@domain/enums/audit-action.enum';
+import type { AuditAction } from '@domain/enums/audit-action.enum';
+import { IAuditLogRepository } from '@domain/repositories/audit-log.repository';
+import { Inject, Injectable } from '@nestjs/common';
+import { PrismaService } from '../database/prisma/prisma.service';
 
 @Injectable()
 export class AuditLogRepository extends IAuditLogRepository {
-  constructor(private readonly prisma: PrismaService) { super(); }
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {
+    super();
+  }
 
   async create(auditLog: AuditLogEntity): Promise<AuditLogEntity> {
     const created = await this.prisma.auditLog.create({
@@ -35,17 +37,23 @@ export class AuditLogRepository extends IAuditLogRepository {
   }
 
   async findBySalesOrderId(salesOrderId: string): Promise<AuditLogEntity[]> {
-    const logs = await this.prisma.auditLog.findMany({ where: { salesOrderId }, orderBy: { createdAt: 'asc' } });
-    return logs.map((log): AuditLogEntity => new AuditLogEntity({
-      id: log.id,
-      action: log.action as AuditAction,
-      entityType: log.entityType,
-      entityId: log.entityId,
-      previousState: log.previousState ?? undefined,
-      currentState: log.currentState ?? undefined,
-      metadata: log.metadata ?? undefined,
-      createdAt: log.createdAt,
-      salesOrderId: log.salesOrderId ?? undefined,
-    }));
+    const logs = await this.prisma.auditLog.findMany({
+      where: { salesOrderId },
+      orderBy: { createdAt: 'asc' },
+    });
+    return logs.map(
+      (log): AuditLogEntity =>
+        new AuditLogEntity({
+          id: log.id,
+          action: log.action as AuditAction,
+          entityType: log.entityType,
+          entityId: log.entityId,
+          previousState: log.previousState ?? undefined,
+          currentState: log.currentState ?? undefined,
+          metadata: log.metadata ?? undefined,
+          createdAt: log.createdAt,
+          salesOrderId: log.salesOrderId ?? undefined,
+        }),
+    );
   }
 }

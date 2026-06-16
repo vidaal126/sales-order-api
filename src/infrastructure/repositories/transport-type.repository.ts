@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma/prisma.service';
-import { ITransportTypeRepository } from '@domain/repositories/transport-type.repository';
 import { TransportTypeEntity } from '@domain/entities/transport-type.entity';
+import { ITransportTypeRepository } from '@domain/repositories/transport-type.repository';
+import { Inject, Injectable } from '@nestjs/common';
+import { PrismaService } from '../database/prisma/prisma.service';
 
 @Injectable()
 export class TransportTypeRepository extends ITransportTypeRepository {
-  constructor(private readonly prisma: PrismaService) { super(); }
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {
+    super();
+  }
 
   async findById(id: string): Promise<TransportTypeEntity | undefined> {
     const transportType = await this.prisma.transportType.findUnique({ where: { id } });
@@ -33,18 +35,25 @@ export class TransportTypeRepository extends ITransportTypeRepository {
 
   async findAll(): Promise<TransportTypeEntity[]> {
     const transportTypes = await this.prisma.transportType.findMany();
-    return transportTypes.map((t): TransportTypeEntity => new TransportTypeEntity({
-      id: t.id,
-      name: t.name,
-      description: t.description ?? undefined,
-      createdAt: t.createdAt,
-      updatedAt: t.updatedAt,
-    }));
+    return transportTypes.map(
+      (t): TransportTypeEntity =>
+        new TransportTypeEntity({
+          id: t.id,
+          name: t.name,
+          description: t.description ?? undefined,
+          createdAt: t.createdAt,
+          updatedAt: t.updatedAt,
+        }),
+    );
   }
 
   async create(transportType: TransportTypeEntity): Promise<TransportTypeEntity> {
     const created = await this.prisma.transportType.create({
-      data: { id: transportType.id, name: transportType.name, description: transportType.description },
+      data: {
+        id: transportType.id,
+        name: transportType.name,
+        description: transportType.description,
+      },
     });
     return new TransportTypeEntity({
       id: created.id,

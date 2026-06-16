@@ -1,4 +1,4 @@
-import { SchedulingEntity } from '@domain/entities/scheduling.entity';
+import type { SchedulingEntity } from '@domain/entities/scheduling.entity';
 
 export abstract class ISchedulingRepository {
   abstract findBySalesOrderId(salesOrderId: string): Promise<SchedulingEntity | undefined>;
