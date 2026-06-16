@@ -9,8 +9,10 @@ import type { LevelWithSilent } from 'pino';
 import { envValidationSchema } from '../../config/env.validation';
 import { HttpExceptionFilter } from '../../infrastructure/http/filters/http-exception.filter';
 import { ThrottlerBehindProxyGuard } from '../../infrastructure/http/guards/throttler-behind-proxy.guard';
+import { MetricsInterceptor } from '../../infrastructure/http/interceptors/metrics.interceptor';
 import { TraceIdInterceptor } from '../../infrastructure/http/interceptors/trace-id.interceptor';
 import { TransformResponseInterceptor } from '../../infrastructure/http/interceptors/transform-response.interceptor';
+import { MetricsModule } from '../../infrastructure/http/metrics/metrics.module';
 import { CustomerModule } from './customer.module';
 import { ItemModule } from './item.module';
 import { SalesOrderModule } from './sales-order.module';
@@ -65,6 +67,7 @@ import { TransportTypeModule } from './transport-type.module';
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 30 }]),
     EventEmitterModule.forRoot(),
     SharedModule,
+    MetricsModule,
     CustomerModule,
     TransportTypeModule,
     ItemModule,
@@ -75,6 +78,7 @@ import { TransportTypeModule } from './transport-type.module';
     { provide: APP_GUARD, useClass: ThrottlerBehindProxyGuard },
     { provide: APP_INTERCEPTOR, useClass: TraceIdInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransformResponseInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor },
   ],
 })
 export class AppModule {}

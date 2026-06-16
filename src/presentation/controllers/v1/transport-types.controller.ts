@@ -1,11 +1,11 @@
-import type { CreateTransportTypeUseCase } from '@application/usecases/transport-type/create-transport-type.use-case';
-import type { GetTransportTypesUseCase } from '@application/usecases/transport-type/get-transport-types.use-case';
-import type { UpdateTransportTypeUseCase } from '@application/usecases/transport-type/update-transport-type.use-case';
+import { CreateTransportTypeUseCase } from '@application/usecases/transport-type/create-transport-type.use-case';
+import { GetTransportTypesUseCase } from '@application/usecases/transport-type/get-transport-types.use-case';
+import { UpdateTransportTypeUseCase } from '@application/usecases/transport-type/update-transport-type.use-case';
 import type { TransportTypeEntity } from '@domain/entities/transport-type.entity';
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { CreateTransportTypeDto } from '@presentation/dtos/transport-type/create-transport-type.dto';
-import type { UpdateTransportTypeDto } from '@presentation/dtos/transport-type/update-transport-type.dto';
+import { CreateTransportTypeDto } from '@presentation/dtos/transport-type/create-transport-type.dto';
+import { UpdateTransportTypeDto } from '@presentation/dtos/transport-type/update-transport-type.dto';
 
 @ApiTags('Transport Types')
 @Controller('transport-types')

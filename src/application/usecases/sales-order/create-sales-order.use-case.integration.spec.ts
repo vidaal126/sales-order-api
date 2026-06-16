@@ -9,7 +9,7 @@ import { PrismaService } from '@infrastructure/database/prisma/prisma.service';
 import { CustomerRepository } from '@infrastructure/repositories/customer.repository';
 import { ItemRepository } from '@infrastructure/repositories/item.repository';
 import { SalesOrderRepository } from '@infrastructure/repositories/sales-order.repository';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -27,16 +27,7 @@ describe('CreateSalesOrderUseCase - Integration', (): void => {
     module = await Test.createTestingModule({
       imports: [ConfigModule.forRoot({ isGlobal: true }), EventEmitterModule.forRoot()],
       providers: [
-        ConfigService,
-        {
-          provide: PrismaService,
-          useFactory: async (config: ConfigService): Promise<PrismaService> => {
-            const service = new PrismaService(config);
-            await service.onModuleInit();
-            return service;
-          },
-          inject: [ConfigService],
-        },
+        PrismaService,
         { provide: ICustomerRepository, useClass: CustomerRepository },
         { provide: IItemRepository, useClass: ItemRepository },
         { provide: ISalesOrderRepository, useClass: SalesOrderRepository },

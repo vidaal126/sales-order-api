@@ -5,6 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
+import { collectDefaultMetrics, register } from 'prom-client';
 import { AppModule } from './presentation/modules/app.module';
 
 async function bootstrap(): Promise<void> {
@@ -64,6 +65,9 @@ async function bootstrap(): Promise<void> {
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
 
@@ -76,6 +80,14 @@ async function bootstrap(): Promise<void> {
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('docs', app, document, { useGlobalPrefix: true });
   }
+
+  collectDefaultMetrics();
+
+  const server = app.getHttpAdapter().getInstance();
+  server.get('/metrics', async (_request, reply): Promise<void> => {
+    reply.header('Content-Type', register.contentType);
+    await reply.send(await register.metrics());
+  });
 
   const port = config.get<number>('PORT', 3000);
   await app.listen(port, '0.0.0.0');

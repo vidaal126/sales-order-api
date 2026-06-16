@@ -1,11 +1,11 @@
-import type { CreateCustomerUseCase } from '@application/usecases/customer/create-customer.use-case';
-import type { GetCustomersUseCase } from '@application/usecases/customer/get-customers.use-case';
-import type { UpdateCustomerUseCase } from '@application/usecases/customer/update-customer.use-case';
+import { CreateCustomerUseCase } from '@application/usecases/customer/create-customer.use-case';
+import { GetCustomersUseCase } from '@application/usecases/customer/get-customers.use-case';
+import { UpdateCustomerUseCase } from '@application/usecases/customer/update-customer.use-case';
 import type { CustomerEntity } from '@domain/entities/customer.entity';
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { CreateCustomerDto } from '@presentation/dtos/customer/create-customer.dto';
-import type { UpdateCustomerDto } from '@presentation/dtos/customer/update-customer.dto';
+import { CreateCustomerDto } from '@presentation/dtos/customer/create-customer.dto';
+import { UpdateCustomerDto } from '@presentation/dtos/customer/update-customer.dto';
 
 @ApiTags('Customers')
 @Controller('/customers')
