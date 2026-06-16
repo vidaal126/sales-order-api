@@ -4,8 +4,8 @@ import { IItemRepository } from '@domain/repositories/item.repository';
 import { ItemEntity } from '@domain/entities/item.entity';
 
 @Injectable()
-export class ItemRepository implements IItemRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class ItemRepository extends IItemRepository {
+  constructor(private readonly prisma: PrismaService) { super(); }
 
   async findById(id: string): Promise<ItemEntity | undefined> {
     const item = await this.prisma.item.findUnique({ where: { id } });

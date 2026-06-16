@@ -12,8 +12,8 @@ type SalesOrderWithRelations = Prisma.SalesOrderGetPayload<{
 }>;
 
 @Injectable()
-export class SalesOrderRepository implements ISalesOrderRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class SalesOrderRepository extends ISalesOrderRepository {
+  constructor(private readonly prisma: PrismaService) { super(); }
 
   private toDomain(raw: SalesOrderWithRelations): SalesOrderEntity {
     return new SalesOrderEntity({

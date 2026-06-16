@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
-import type { ICustomerRepository } from "@domain/repositories/customer.repository";
-import type { IItemRepository } from "@domain/repositories/item.repository";
+import { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
+import { ICustomerRepository } from "@domain/repositories/customer.repository";
+import { IItemRepository } from "@domain/repositories/item.repository";
 import { SalesOrderEntity } from "@domain/entities/sales-order.entity";
 import { SalesOrderItemEntity } from "@domain/entities/sales-order-item.entity";
 import { OrderStatus } from "@domain/enums/order-status.enum";

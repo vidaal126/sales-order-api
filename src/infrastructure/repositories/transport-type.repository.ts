@@ -4,8 +4,8 @@ import { ITransportTypeRepository } from '@domain/repositories/transport-type.re
 import { TransportTypeEntity } from '@domain/entities/transport-type.entity';
 
 @Injectable()
-export class TransportTypeRepository implements ITransportTypeRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class TransportTypeRepository extends ITransportTypeRepository {
+  constructor(private readonly prisma: PrismaService) { super(); }
 
   async findById(id: string): Promise<TransportTypeEntity | undefined> {
     const transportType = await this.prisma.transportType.findUnique({ where: { id } });

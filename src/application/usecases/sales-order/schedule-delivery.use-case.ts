@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
-import type { ISchedulingRepository } from "@domain/repositories/scheduling.repository";
+import { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
+import { ISchedulingRepository } from "@domain/repositories/scheduling.repository";
 import type { IEventEmitter } from "@domain/events/event-emitter.port";
 import { EVENT_EMITTER_PORT } from "@domain/events/event-emitter.port";
 import { SchedulingEntity } from "@domain/entities/scheduling.entity";

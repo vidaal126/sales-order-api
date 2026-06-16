@@ -8,7 +8,7 @@ import {
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { BusinessRuleException } from "../exceptions/business-rule.exception";
-import { DomainException } from "../exceptions/domain.exception";
+import { DomainException } from "@domain/exceptions/domain.exception";
 import { DuplicateRequestException } from "../exceptions/duplicate-request.exception";
 import { ExternalServiceException } from "../exceptions/external-service.exception";
 import { DomainForbiddenException } from "../exceptions/forbidden.exception";

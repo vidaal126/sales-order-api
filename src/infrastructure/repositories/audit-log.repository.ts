@@ -5,8 +5,8 @@ import { AuditLogEntity } from '@domain/entities/audit-log.entity';
 import { AuditAction } from '@domain/enums/audit-action.enum';
 
 @Injectable()
-export class AuditLogRepository implements IAuditLogRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class AuditLogRepository extends IAuditLogRepository {
+  constructor(private readonly prisma: PrismaService) { super(); }
 
   async create(auditLog: AuditLogEntity): Promise<AuditLogEntity> {
     const created = await this.prisma.auditLog.create({

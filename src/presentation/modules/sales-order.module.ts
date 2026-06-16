@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
+import { ICustomerRepository } from '@domain/repositories/customer.repository';
+import { IItemRepository } from '@domain/repositories/item.repository';
+import { ISchedulingRepository } from '@domain/repositories/scheduling.repository';
+import { IAuditLogRepository } from '@domain/repositories/audit-log.repository';
 import { SalesOrderRepository } from '@infrastructure/repositories/sales-order.repository';
 import { CustomerRepository } from '@infrastructure/repositories/customer.repository';
 import { ItemRepository } from '@infrastructure/repositories/item.repository';
@@ -20,12 +25,19 @@ import { EVENT_EMITTER_PORT } from '@domain/events/event-emitter.port';
   imports: [EventEmitterModule],
   controllers: [SalesOrdersController],
   providers: [
-    SalesOrderRepository, CustomerRepository, ItemRepository,
-    SchedulingRepository, AuditLogRepository, AuditListener,
-    CreateSalesOrderUseCase, UpdateSalesOrderStatusUseCase,
-    GetSalesOrdersUseCase, GetSalesOrderByIdUseCase,
-    ScheduleDeliveryUseCase, RescheduleDeliveryUseCase,
+    { provide: ISalesOrderRepository, useClass: SalesOrderRepository },
+    { provide: ICustomerRepository, useClass: CustomerRepository },
+    { provide: IItemRepository, useClass: ItemRepository },
+    { provide: ISchedulingRepository, useClass: SchedulingRepository },
+    { provide: IAuditLogRepository, useClass: AuditLogRepository },
     { provide: EVENT_EMITTER_PORT, useExisting: EventEmitter2 },
+    AuditListener,
+    CreateSalesOrderUseCase,
+    UpdateSalesOrderStatusUseCase,
+    GetSalesOrdersUseCase,
+    GetSalesOrderByIdUseCase,
+    ScheduleDeliveryUseCase,
+    RescheduleDeliveryUseCase,
   ],
 })
 export class SalesOrderModule {}

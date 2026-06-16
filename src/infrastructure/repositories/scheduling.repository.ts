@@ -4,8 +4,8 @@ import { ISchedulingRepository } from '@domain/repositories/scheduling.repositor
 import { SchedulingEntity } from '@domain/entities/scheduling.entity';
 
 @Injectable()
-export class SchedulingRepository implements ISchedulingRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class SchedulingRepository extends ISchedulingRepository {
+  constructor(private readonly prisma: PrismaService) { super(); }
 
   async findBySalesOrderId(salesOrderId: string): Promise<SchedulingEntity | undefined> {
     const scheduling = await this.prisma.scheduling.findUnique({ where: { salesOrderId } });

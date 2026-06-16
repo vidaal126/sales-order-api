@@ -1,9 +1,9 @@
 import { CustomerEntity } from "@domain/entities/customer.entity";
 
-export interface ICustomerRepository {
-  findById(id: string): Promise<CustomerEntity | undefined>;
-  findAll(): Promise<CustomerEntity[]>;
-  findByDocument(document: string): Promise<CustomerEntity | undefined>;
-  create(customer: CustomerEntity): Promise<CustomerEntity>;
-  update(customer: CustomerEntity): Promise<CustomerEntity>;
+export abstract class ICustomerRepository {
+  abstract findById(id: string): Promise<CustomerEntity | undefined>;
+  abstract findAll(): Promise<CustomerEntity[]>;
+  abstract findByDocument(document: string): Promise<CustomerEntity | undefined>;
+  abstract create(customer: CustomerEntity): Promise<CustomerEntity>;
+  abstract update(customer: CustomerEntity): Promise<CustomerEntity>;
 }

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import type { ICustomerRepository } from "@domain/repositories/customer.repository";
-import type { ITransportTypeRepository } from "@domain/repositories/transport-type.repository";
+import { ICustomerRepository } from "@domain/repositories/customer.repository";
+import { ITransportTypeRepository } from "@domain/repositories/transport-type.repository";
 import { CustomerEntity } from "@domain/entities/customer.entity";
 import { DomainException } from "@domain/exceptions/domain.exception";
 

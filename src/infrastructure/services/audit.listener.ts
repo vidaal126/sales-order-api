@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import type { IAuditLogRepository } from '@domain/repositories/audit-log.repository';
+import { IAuditLogRepository } from '@domain/repositories/audit-log.repository';
 import { AuditLogEntity } from '@domain/entities/audit-log.entity';
 import { AuditAction } from '@domain/enums/audit-action.enum';
 import { randomUUID } from 'crypto';

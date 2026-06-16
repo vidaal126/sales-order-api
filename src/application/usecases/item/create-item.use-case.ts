@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { IItemRepository } from "@domain/repositories/item.repository";
+import { IItemRepository } from "@domain/repositories/item.repository";
 import { ItemEntity } from "@domain/entities/item.entity";
 import { DomainException } from "@domain/exceptions/domain.exception";
 import { randomUUID } from "crypto";

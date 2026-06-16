@@ -10,9 +10,9 @@ export interface SalesOrderFilters {
   dateTo?: Date;
 }
 
-export interface ISalesOrderRepository {
-  findById(id: string): Promise<SalesOrderEntity | undefined>;
-  findAll(filters?: SalesOrderFilters): Promise<SalesOrderEntity[]>;
-  create(salesOrder: SalesOrderEntity): Promise<SalesOrderEntity>;
-  update(salesOrder: SalesOrderEntity): Promise<SalesOrderEntity>;
+export abstract class ISalesOrderRepository {
+  abstract findById(id: string): Promise<SalesOrderEntity | undefined>;
+  abstract findAll(filters?: SalesOrderFilters): Promise<SalesOrderEntity[]>;
+  abstract create(salesOrder: SalesOrderEntity): Promise<SalesOrderEntity>;
+  abstract update(salesOrder: SalesOrderEntity): Promise<SalesOrderEntity>;
 }

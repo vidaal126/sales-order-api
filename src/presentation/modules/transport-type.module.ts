@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ITransportTypeRepository } from '@domain/repositories/transport-type.repository';
 import { TransportTypeRepository } from '@infrastructure/repositories/transport-type.repository';
 import { CreateTransportTypeUseCase } from '@application/usecases/transport-type/create-transport-type.use-case';
 import { UpdateTransportTypeUseCase } from '@application/usecases/transport-type/update-transport-type.use-case';
@@ -7,7 +8,12 @@ import { TransportTypesController } from '@presentation/controllers/v1/transport
 
 @Module({
   controllers: [TransportTypesController],
-  providers: [TransportTypeRepository, CreateTransportTypeUseCase, UpdateTransportTypeUseCase, GetTransportTypesUseCase],
-  exports: [TransportTypeRepository],
+  providers: [
+    { provide: ITransportTypeRepository, useClass: TransportTypeRepository },
+    CreateTransportTypeUseCase,
+    UpdateTransportTypeUseCase,
+    GetTransportTypesUseCase,
+  ],
+  exports: [ITransportTypeRepository],
 })
 export class TransportTypeModule {}

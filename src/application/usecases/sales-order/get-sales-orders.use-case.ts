@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type {
+import {
   ISalesOrderRepository,
   SalesOrderFilters,
 } from "@domain/repositories/sales-order.repository";

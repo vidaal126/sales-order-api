@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
+import { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
 import { SalesOrderEntity } from "@domain/entities/sales-order.entity";
 import { DomainException } from "@domain/exceptions/domain.exception";
 

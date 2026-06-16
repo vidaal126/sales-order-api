@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
+import { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
 import type { IEventEmitter } from "@domain/events/event-emitter.port";
 import { EVENT_EMITTER_PORT } from "@domain/events/event-emitter.port";
 import { SalesOrderEntity } from "@domain/entities/sales-order.entity";

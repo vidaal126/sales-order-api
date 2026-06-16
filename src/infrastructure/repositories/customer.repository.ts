@@ -4,8 +4,8 @@ import { ICustomerRepository } from "@domain/repositories/customer.repository";
 import { CustomerEntity } from "@domain/entities/customer.entity";
 
 @Injectable()
-export class CustomerRepository implements ICustomerRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class CustomerRepository extends ICustomerRepository {
+  constructor(private readonly prisma: PrismaService) { super(); }
 
   async findById(id: string): Promise<CustomerEntity | undefined> {
     const customer = await this.prisma.customer.findUnique({
