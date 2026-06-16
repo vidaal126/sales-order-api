@@ -18,17 +18,13 @@ scrape_configs:
             values: ['sales-order-api-app']
     relabel_configs:
       - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
         target_label: container
+        replacement: '$1'
       - source_labels: ['__meta_docker_container_log_stream']
         target_label: stream
     pipeline_stages:
-      - json:
-          expressions:
-            level: level
-            msg: msg
-            traceId: traceId
-            route: route
+      - regex:
+          expression: '^\[[\d:.]+\]\s+(?P<level>[A-Z]+)\s+'
       - labels:
           level:
-          traceId:
-          route:
