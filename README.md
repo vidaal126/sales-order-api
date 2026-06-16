@@ -416,65 +416,6 @@ graph TD
     AL --> R
 ```
 
-### Fluxo de uma Requisição
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Controller
-    participant UseCase
-    participant Entity
-    participant Repository
-    participant Prisma
-    participant DB as PostgreSQL
-
-    Client->>Controller: HTTP Request
-    Controller->>UseCase: execute(input)
-    UseCase->>Repository: findById()
-    Repository->>Prisma: query
-    Prisma->>DB: SQL
-    DB-->>Prisma: rows
-    Prisma-->>Repository: result
-    Repository-->>UseCase: Entity
-    UseCase->>Entity: transitionTo() / validate()
-    Entity-->>UseCase: ok ou DomainException
-    UseCase->>Repository: save(entity)
-    Repository->>DB: SQL
-    UseCase-->>Controller: result
-    Controller-->>Client: HTTP Response
-```
-
-### Infraestrutura AWS
-
-```mermaid
-graph TD
-    Internet([Internet])
-    GH([GitHub Actions])
-
-    subgraph AWS
-        subgraph VPC
-            subgraph Public Subnets
-                ALB[Application Load Balancer]
-            end
-            subgraph Private Subnets
-                ECS[ECS Fargate - NestJS]
-                RDS[(RDS PostgreSQL)]
-            end
-        end
-        ECR[ECR - Docker Registry]
-        IAM[IAM Role - OIDC]
-    end
-
-    Internet --> ALB
-    ALB --> ECS
-    ECS --> RDS
-    GH -->|assume role via OIDC| IAM
-    IAM -->|credentials| GH
-    GH -->|push image| ECR
-    GH -->|deploy| ECS
-    ECR -->|pull image| ECS
-```
-
 ### Hexagonal Architecture (Ports & Adapters)
 
 ```
