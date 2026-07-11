@@ -23,6 +23,7 @@ export default defineConfig({
       "@application": resolve(__dirname, "src/application"),
       "@infrastructure": resolve(__dirname, "src/infrastructure"),
       "@presentation": resolve(__dirname, "src/presentation"),
+      "@common": resolve(__dirname, "src/common"),
     },
   },
 });

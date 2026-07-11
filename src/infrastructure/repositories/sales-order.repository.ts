@@ -2,11 +2,11 @@ import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { SchedulingEntity } from '@domain/entities/scheduling.entity';
 import type { OrderStatus } from '@domain/enums/order-status.enum';
+import { resolvePageSize } from '@domain/repositories/pagination';
 import {
   ISalesOrderRepository,
   type SalesOrderFilters,
 } from '@domain/repositories/sales-order.repository';
-import { resolvePageSize } from '@domain/repositories/pagination';
 import { Inject, Injectable } from '@nestjs/common';
 import type { Prisma } from '../database/generated/client';
 import { PrismaService } from '../database/prisma/prisma.service';

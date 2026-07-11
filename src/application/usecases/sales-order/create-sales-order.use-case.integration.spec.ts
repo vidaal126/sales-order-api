@@ -45,11 +45,12 @@ describe('CreateSalesOrderUseCase - Integration', (): void => {
     });
 
     customerId = randomUUID();
+    const document = `${Math.floor(Math.random() * 900 + 100)}.${Math.floor(Math.random() * 900 + 100)}.${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 90 + 10)}`;
     await prisma.customer.create({
       data: {
         id: customerId,
         name: 'Cliente Teste',
-        document: `doc-${customerId}`,
+        document,
         authorizedTransports: { create: [{ transportTypeId }] },
       },
     });

@@ -1,6 +1,6 @@
 import { CustomerEntity } from '@domain/entities/customer.entity';
 import type { ICustomerRepository } from '@domain/repositories/customer.repository';
-import { resolvePageSize, type PaginationParams } from '@domain/repositories/pagination';
+import { type PaginationParams, resolvePageSize } from '@domain/repositories/pagination';
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma/prisma.service';
 

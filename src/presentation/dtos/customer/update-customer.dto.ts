@@ -1,4 +1,6 @@
+import { normalizePhone } from '@common/utils/normalization';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsArray, IsEmail, IsOptional, IsString, IsUUID, Matches } from 'class-validator';
 
 export class UpdateCustomerDto {
@@ -14,6 +16,7 @@ export class UpdateCustomerDto {
 
   @ApiPropertyOptional({ example: '(61) 99999-9999' })
   @IsString()
+  @Transform(({ value }): unknown => normalizePhone(value))
   @Matches(/^\(\d{2}\) \d{4,5}-\d{4}$/, {
     message: 'phone must be in the format (XX) XXXXX-XXXX',
   })

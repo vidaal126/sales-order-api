@@ -39,21 +39,14 @@ export class RescheduleDeliveryUseCase {
       async (tx): Promise<RescheduleResult> => {
         const order = await this.salesOrderRepository.findById(input.salesOrderId, tx);
         if (!order) {
-          throw new DomainNotFoundException(
-            `Ordem de venda ${input.salesOrderId} não encontrada.`,
-          );
+          throw new DomainNotFoundException(`Ordem de venda ${input.salesOrderId} não encontrada.`);
         }
 
         if (order.status === OrderStatus.ENTREGUE) {
-          throw new DomainException(
-            `Não é possível reagendar a entrega de uma ordem já entregue.`,
-          );
+          throw new DomainException(`Não é possível reagendar a entrega de uma ordem já entregue.`);
         }
 
-        const existing = await this.schedulingRepository.findBySalesOrderId(
-          input.salesOrderId,
-          tx,
-        );
+        const existing = await this.schedulingRepository.findBySalesOrderId(input.salesOrderId, tx);
         if (!existing) {
           throw new DomainNotFoundException(
             `Agendamento para ordem ${input.salesOrderId} não encontrado.`,
