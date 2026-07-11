@@ -21,6 +21,22 @@ export class TransportTypeRepository extends ITransportTypeRepository {
     });
   }
 
+  async findByIds(ids: string[]): Promise<TransportTypeEntity[]> {
+    const transportTypes = await this.prisma.transportType.findMany({
+      where: { id: { in: ids } },
+    });
+    return transportTypes.map(
+      (transportType): TransportTypeEntity =>
+        new TransportTypeEntity({
+          id: transportType.id,
+          name: transportType.name,
+          description: transportType.description ?? undefined,
+          createdAt: transportType.createdAt,
+          updatedAt: transportType.updatedAt,
+        }),
+    );
+  }
+
   async findByName(name: string): Promise<TransportTypeEntity | undefined> {
     const transportType = await this.prisma.transportType.findUnique({ where: { name } });
     if (!transportType) return undefined;

@@ -1,3 +1,4 @@
+import { ChangeSalesOrderTransportUseCase } from '@application/usecases/sales-order/change-sales-order-transport.use-case';
 import { CreateSalesOrderUseCase } from '@application/usecases/sales-order/create-sales-order.use-case';
 import { GetSalesOrderByIdUseCase } from '@application/usecases/sales-order/get-sales-order-by-id.use-case';
 import { GetSalesOrdersUseCase } from '@application/usecases/sales-order/get-sales-orders.use-case';
@@ -37,6 +38,7 @@ import { SalesOrdersController } from '@presentation/controllers/v1/sales-orders
     GetSalesOrderByIdUseCase,
     ScheduleDeliveryUseCase,
     RescheduleDeliveryUseCase,
+    ChangeSalesOrderTransportUseCase,
   ],
 })
 export class SalesOrderModule {}

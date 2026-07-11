@@ -50,7 +50,7 @@ async function bootstrap(): Promise<void> {
       callback(null, false);
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Trace-Id', 'Idempotency-Key'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Trace-Id'],
     exposedHeaders: ['X-Trace-Id'],
     credentials: false,
     maxAge: 86_400,
@@ -83,8 +83,14 @@ async function bootstrap(): Promise<void> {
 
   collectDefaultMetrics();
 
+  const metricsToken = config.get<string>('METRICS_TOKEN');
   const server = app.getHttpAdapter().getInstance();
-  server.get('/metrics', async (_request, reply): Promise<void> => {
+  server.get('/metrics', async (request, reply): Promise<void> => {
+    const authorization = request.headers.authorization;
+    if (authorization !== `Bearer ${metricsToken}`) {
+      await reply.status(401).send({ error: 'Unauthorized' });
+      return;
+    }
     reply.header('Content-Type', register.contentType);
     await reply.send(await register.metrics());
   });

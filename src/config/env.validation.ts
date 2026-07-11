@@ -6,4 +6,5 @@ export const envValidationSchema = Joi.object({
   DATABASE_URL: Joi.string().required(),
   CORS_ORIGIN: Joi.string().default(''),
   LOG_LEVEL: Joi.string().valid('trace', 'debug', 'info', 'warn', 'error').default('info'),
+  METRICS_TOKEN: Joi.string().required(),
 });

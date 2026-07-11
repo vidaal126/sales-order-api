@@ -14,13 +14,13 @@ const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 
 export class SalesOrderEntity extends BaseEntity {
   readonly customerId: string;
-  readonly transportTypeId: string;
   readonly notes?: string;
   readonly updatedAt: Date;
   readonly items: SalesOrderItemEntity[];
   readonly scheduling?: SchedulingEntity;
 
   private _status: OrderStatus;
+  private _transportTypeId: string;
 
   constructor(props: {
     id: string;
@@ -34,8 +34,13 @@ export class SalesOrderEntity extends BaseEntity {
     scheduling?: SchedulingEntity;
   }) {
     super(props.id, props.createdAt);
+
+    if (props.items.length === 0) {
+      throw new DomainException('Ordem de venda deve conter ao menos um item.');
+    }
+
     this.customerId = props.customerId;
-    this.transportTypeId = props.transportTypeId;
+    this._transportTypeId = props.transportTypeId;
     this._status = props.status;
     this.notes = props.notes;
     this.updatedAt = props.updatedAt;
@@ -45,6 +50,14 @@ export class SalesOrderEntity extends BaseEntity {
 
   get status(): OrderStatus {
     return this._status;
+  }
+
+  get transportTypeId(): string {
+    return this._transportTypeId;
+  }
+
+  changeTransportTo(newTransportTypeId: string): void {
+    this._transportTypeId = newTransportTypeId;
   }
 
   transitionTo(newStatus: OrderStatus): void {
@@ -60,5 +73,19 @@ export class SalesOrderEntity extends BaseEntity {
 
   canTransitionTo(newStatus: OrderStatus): boolean {
     return VALID_TRANSITIONS[this._status].includes(newStatus);
+  }
+
+  toJSON(): Record<string, unknown> {
+    return {
+      id: this.id,
+      customerId: this.customerId,
+      transportTypeId: this.transportTypeId,
+      status: this.status,
+      notes: this.notes,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      items: this.items,
+      scheduling: this.scheduling,
+    };
   }
 }

@@ -1,8 +1,9 @@
 import { CreateItemUseCase } from '@application/usecases/item/create-item.use-case';
 import { GetItemsUseCase } from '@application/usecases/item/get-items.use-case';
 import type { ItemEntity } from '@domain/entities/item.entity';
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { PaginationQueryDto } from '@presentation/dtos/common/pagination-query.dto';
 import { CreateItemDto } from '@presentation/dtos/item/create-item.dto';
 
 @ApiTags('Items')
@@ -26,7 +27,7 @@ export class ItemsController {
 
   @Get()
   @ApiOperation({ summary: 'Listar itens' })
-  async findAll(): Promise<ItemEntity[]> {
-    return this.getItemsUseCase.execute();
+  async findAll(@Query() query: PaginationQueryDto): Promise<ItemEntity[]> {
+    return this.getItemsUseCase.execute(query);
   }
 }

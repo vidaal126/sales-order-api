@@ -1,5 +1,6 @@
 import { ItemEntity } from '@domain/entities/item.entity';
 import { IItemRepository } from '@domain/repositories/item.repository';
+import { resolvePageSize, type PaginationParams } from '@domain/repositories/pagination';
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma/prisma.service';
 
@@ -35,8 +36,13 @@ export class ItemRepository extends IItemRepository {
     });
   }
 
-  async findAll(): Promise<ItemEntity[]> {
-    const items = await this.prisma.item.findMany();
+  async findAll(params?: PaginationParams): Promise<ItemEntity[]> {
+    const limit = resolvePageSize(params?.limit);
+    const page = params?.page ?? 1;
+    const items = await this.prisma.item.findMany({
+      take: limit,
+      skip: (page - 1) * limit,
+    });
     return items.map(
       (i): ItemEntity =>
         new ItemEntity({

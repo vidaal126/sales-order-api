@@ -1,8 +1,8 @@
 model Scheduling {
   id            String    @id @default(uuid())
   deliveryDate  DateTime  @db.Date
-  windowStart   DateTime  @db.Time
-  windowEnd     DateTime  @db.Time
+  windowStart   DateTime  @db.Timestamptz
+  windowEnd     DateTime  @db.Timestamptz
   confirmedAt   DateTime?
   rescheduledAt DateTime?
   createdAt     DateTime  @default(now())

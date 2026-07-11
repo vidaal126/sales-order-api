@@ -1,6 +1,7 @@
 import { CustomerEntity } from '@domain/entities/customer.entity';
 import { ItemEntity } from '@domain/entities/item.entity';
 import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
+import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
 import type { IEventEmitter } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
@@ -64,7 +65,7 @@ const makeOrder = (): SalesOrderEntity =>
     status: OrderStatus.CRIADA,
     createdAt: new Date(),
     updatedAt: new Date(),
-    items: [],
+    items: [new SalesOrderItemEntity({ itemId: 'item-id', quantity: 2, unitPrice: 29.9 })],
   });
 
 describe('CreateSalesOrderUseCase', (): void => {

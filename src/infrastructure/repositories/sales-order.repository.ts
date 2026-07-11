@@ -6,6 +6,7 @@ import {
   ISalesOrderRepository,
   type SalesOrderFilters,
 } from '@domain/repositories/sales-order.repository';
+import { resolvePageSize } from '@domain/repositories/pagination';
 import { Inject, Injectable } from '@nestjs/common';
 import type { Prisma } from '../database/generated/client';
 import { PrismaService } from '../database/prisma/prisma.service';
@@ -32,6 +33,7 @@ export class SalesOrderRepository extends ISalesOrderRepository {
       items: raw.items.map(
         (item: SalesOrderWithRelations['items'][number]): SalesOrderItemEntity =>
           new SalesOrderItemEntity({
+            id: item.id,
             itemId: item.itemId,
             quantity: item.quantity,
             unitPrice: Number(item.unitPrice),
@@ -53,8 +55,9 @@ export class SalesOrderRepository extends ISalesOrderRepository {
     });
   }
 
-  async findById(id: string): Promise<SalesOrderEntity | undefined> {
-    const order = await this.prisma.salesOrder.findUnique({
+  async findById(id: string, tx?: unknown): Promise<SalesOrderEntity | undefined> {
+    const client = (tx as Prisma.TransactionClient) ?? this.prisma;
+    const order = await client.salesOrder.findUnique({
       where: { id },
       include: { items: true, scheduling: true },
     });
@@ -63,6 +66,8 @@ export class SalesOrderRepository extends ISalesOrderRepository {
   }
 
   async findAll(filters?: SalesOrderFilters): Promise<SalesOrderEntity[]> {
+    const limit = resolvePageSize(filters?.limit);
+    const page = filters?.page ?? 1;
     const orders = await this.prisma.salesOrder.findMany({
       where: {
         status: filters?.status,
@@ -73,6 +78,8 @@ export class SalesOrderRepository extends ISalesOrderRepository {
       },
       include: { items: true, scheduling: true },
       orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: (page - 1) * limit,
     });
     return orders.map((order): SalesOrderEntity => this.toDomain(order));
   }
@@ -100,8 +107,9 @@ export class SalesOrderRepository extends ISalesOrderRepository {
     return this.toDomain(created);
   }
 
-  async update(order: SalesOrderEntity): Promise<SalesOrderEntity> {
-    const updated = await this.prisma.salesOrder.update({
+  async update(order: SalesOrderEntity, tx?: unknown): Promise<SalesOrderEntity> {
+    const client = (tx as Prisma.TransactionClient) ?? this.prisma;
+    const updated = await client.salesOrder.update({
       where: { id: order.id },
       data: { status: order.status, notes: order.notes, transportTypeId: order.transportTypeId },
       include: { items: true, scheduling: true },

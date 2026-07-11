@@ -1,4 +1,5 @@
 import { CreateCustomerUseCase } from '@application/usecases/customer/create-customer.use-case';
+import { GetCustomerByIdUseCase } from '@application/usecases/customer/get-customer-by-id.use-case';
 import { GetCustomersUseCase } from '@application/usecases/customer/get-customers.use-case';
 import { UpdateCustomerUseCase } from '@application/usecases/customer/update-customer.use-case';
 import { ICustomerRepository } from '@domain/repositories/customer.repository';
@@ -16,6 +17,7 @@ import { CustomersController } from '@presentation/controllers/v1/customers.cont
     CreateCustomerUseCase,
     UpdateCustomerUseCase,
     GetCustomersUseCase,
+    GetCustomerByIdUseCase,
   ],
   exports: [ICustomerRepository],
 })

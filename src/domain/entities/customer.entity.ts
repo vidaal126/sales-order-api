@@ -1,3 +1,5 @@
+import { Document } from '@domain/value-objects/document.vo';
+import { Phone } from '@domain/value-objects/phone.vo';
 import { BaseEntity } from './base.entity';
 
 export class CustomerEntity extends BaseEntity {
@@ -20,9 +22,9 @@ export class CustomerEntity extends BaseEntity {
   }) {
     super(props.id, props.createdAt);
     this.name = props.name;
-    this.document = props.document;
+    this.document = Document.create(props.document).value;
     this.email = props.email;
-    this.phone = props.phone;
+    this.phone = props.phone !== undefined ? Phone.create(props.phone).value : undefined;
     this.updatedAt = props.updatedAt;
     this.authorizedTransportTypeIds = props.authorizedTransportTypeIds;
   }

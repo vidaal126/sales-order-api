@@ -4,11 +4,14 @@ import { AuditAction } from '@domain/enums/audit-action.enum';
 import { IAuditLogRepository } from '@domain/repositories/audit-log.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { InjectPinoLogger, type PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class AuditListener {
   constructor(
     @Inject(IAuditLogRepository) private readonly auditLogRepository: IAuditLogRepository,
+    @InjectPinoLogger(AuditListener.name)
+    private readonly logger: PinoLogger,
   ) {}
 
   @OnEvent('order.created')
@@ -17,17 +20,24 @@ export class AuditListener {
     customerId: string;
     status: string;
   }): Promise<void> {
-    await this.auditLogRepository.create(
-      new AuditLogEntity({
-        id: randomUUID(),
-        action: AuditAction.ORDER_CREATED,
-        entityType: 'SalesOrder',
-        entityId: event.orderId,
-        currentState: { status: event.status, customerId: event.customerId },
-        createdAt: new Date(),
-        salesOrderId: event.orderId,
-      }),
-    );
+    try {
+      await this.auditLogRepository.create(
+        new AuditLogEntity({
+          id: randomUUID(),
+          action: AuditAction.ORDER_CREATED,
+          entityType: 'SalesOrder',
+          entityId: event.orderId,
+          currentState: { status: event.status, customerId: event.customerId },
+          createdAt: new Date(),
+          salesOrderId: event.orderId,
+        }),
+      );
+    } catch (err: unknown) {
+      this.logger.error(
+        { err, orderId: event.orderId },
+        'Failed to persist audit log for order.created',
+      );
+    }
   }
 
   @OnEvent('order.status.changed')
@@ -36,18 +46,25 @@ export class AuditListener {
     previousStatus: string;
     currentStatus: string;
   }): Promise<void> {
-    await this.auditLogRepository.create(
-      new AuditLogEntity({
-        id: randomUUID(),
-        action: AuditAction.ORDER_STATUS_CHANGED,
-        entityType: 'SalesOrder',
-        entityId: event.orderId,
-        previousState: { status: event.previousStatus },
-        currentState: { status: event.currentStatus },
-        createdAt: new Date(),
-        salesOrderId: event.orderId,
-      }),
-    );
+    try {
+      await this.auditLogRepository.create(
+        new AuditLogEntity({
+          id: randomUUID(),
+          action: AuditAction.ORDER_STATUS_CHANGED,
+          entityType: 'SalesOrder',
+          entityId: event.orderId,
+          previousState: { status: event.previousStatus },
+          currentState: { status: event.currentStatus },
+          createdAt: new Date(),
+          salesOrderId: event.orderId,
+        }),
+      );
+    } catch (err: unknown) {
+      this.logger.error(
+        { err, orderId: event.orderId },
+        'Failed to persist audit log for order.status.changed',
+      );
+    }
   }
 
   @OnEvent('order.delivery.scheduled')
@@ -56,17 +73,24 @@ export class AuditListener {
     schedulingId: string;
     deliveryDate: Date;
   }): Promise<void> {
-    await this.auditLogRepository.create(
-      new AuditLogEntity({
-        id: randomUUID(),
-        action: AuditAction.DELIVERY_SCHEDULED,
-        entityType: 'SalesOrder',
-        entityId: event.orderId,
-        currentState: { schedulingId: event.schedulingId, deliveryDate: event.deliveryDate },
-        createdAt: new Date(),
-        salesOrderId: event.orderId,
-      }),
-    );
+    try {
+      await this.auditLogRepository.create(
+        new AuditLogEntity({
+          id: randomUUID(),
+          action: AuditAction.DELIVERY_SCHEDULED,
+          entityType: 'SalesOrder',
+          entityId: event.orderId,
+          currentState: { schedulingId: event.schedulingId, deliveryDate: event.deliveryDate },
+          createdAt: new Date(),
+          salesOrderId: event.orderId,
+        }),
+      );
+    } catch (err: unknown) {
+      this.logger.error(
+        { err, orderId: event.orderId },
+        'Failed to persist audit log for order.delivery.scheduled',
+      );
+    }
   }
 
   @OnEvent('order.delivery.rescheduled')
@@ -75,17 +99,51 @@ export class AuditListener {
     previousDate: Date;
     newDate: Date;
   }): Promise<void> {
-    await this.auditLogRepository.create(
-      new AuditLogEntity({
-        id: randomUUID(),
-        action: AuditAction.DELIVERY_RESCHEDULED,
-        entityType: 'SalesOrder',
-        entityId: event.orderId,
-        previousState: { deliveryDate: event.previousDate },
-        currentState: { deliveryDate: event.newDate },
-        createdAt: new Date(),
-        salesOrderId: event.orderId,
-      }),
-    );
+    try {
+      await this.auditLogRepository.create(
+        new AuditLogEntity({
+          id: randomUUID(),
+          action: AuditAction.DELIVERY_RESCHEDULED,
+          entityType: 'SalesOrder',
+          entityId: event.orderId,
+          previousState: { deliveryDate: event.previousDate },
+          currentState: { deliveryDate: event.newDate },
+          createdAt: new Date(),
+          salesOrderId: event.orderId,
+        }),
+      );
+    } catch (err: unknown) {
+      this.logger.error(
+        { err, orderId: event.orderId },
+        'Failed to persist audit log for order.delivery.rescheduled',
+      );
+    }
+  }
+
+  @OnEvent('order.transport.changed')
+  async handleTransportChanged(event: {
+    orderId: string;
+    previousTransportTypeId: string;
+    currentTransportTypeId: string;
+  }): Promise<void> {
+    try {
+      await this.auditLogRepository.create(
+        new AuditLogEntity({
+          id: randomUUID(),
+          action: AuditAction.TRANSPORT_CHANGED,
+          entityType: 'SalesOrder',
+          entityId: event.orderId,
+          previousState: { transportTypeId: event.previousTransportTypeId },
+          currentState: { transportTypeId: event.currentTransportTypeId },
+          createdAt: new Date(),
+          salesOrderId: event.orderId,
+        }),
+      );
+    } catch (err: unknown) {
+      this.logger.error(
+        { err, orderId: event.orderId },
+        'Failed to persist audit log for order.transport.changed',
+      );
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { CustomerEntity } from '@domain/entities/customer.entity';
 import type { ICustomerRepository } from '@domain/repositories/customer.repository';
+import { resolvePageSize, type PaginationParams } from '@domain/repositories/pagination';
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma/prisma.service';
 
@@ -47,9 +48,13 @@ export class CustomerRepository implements ICustomerRepository {
     });
   }
 
-  async findAll(): Promise<CustomerEntity[]> {
+  async findAll(params?: PaginationParams): Promise<CustomerEntity[]> {
+    const limit = resolvePageSize(params?.limit);
+    const page = params?.page ?? 1;
     const customers = await this.prisma.customer.findMany({
       include: { authorizedTransports: true },
+      take: limit,
+      skip: (page - 1) * limit,
     });
     return customers.map(
       (customer): CustomerEntity =>

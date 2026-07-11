@@ -1,3 +1,4 @@
+import { ChangeSalesOrderTransportUseCase } from '@application/usecases/sales-order/change-sales-order-transport.use-case';
 import { CreateSalesOrderUseCase } from '@application/usecases/sales-order/create-sales-order.use-case';
 import { GetSalesOrderByIdUseCase } from '@application/usecases/sales-order/get-sales-order-by-id.use-case';
 import { GetSalesOrdersUseCase } from '@application/usecases/sales-order/get-sales-orders.use-case';
@@ -6,10 +7,11 @@ import { ScheduleDeliveryUseCase } from '@application/usecases/sales-order/sched
 import { UpdateSalesOrderStatusUseCase } from '@application/usecases/sales-order/update-sales-order-status.use-case';
 import type { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import type { SchedulingEntity } from '@domain/entities/scheduling.entity';
-import { OrderStatus } from '@domain/enums/order-status.enum';
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ChangeSalesOrderTransportDto } from '@presentation/dtos/sales-order/change-sales-order-transport.dto';
 import { CreateSalesOrderDto } from '@presentation/dtos/sales-order/create-sales-order.dto';
+import { GetSalesOrdersQueryDto } from '@presentation/dtos/sales-order/get-sales-orders-query.dto';
 import { RescheduleDeliveryDto } from '@presentation/dtos/sales-order/reschedule-delivery.dto';
 import { ScheduleDeliveryDto } from '@presentation/dtos/sales-order/schedule-delivery.dto';
 import { UpdateSalesOrderStatusDto } from '@presentation/dtos/sales-order/update-sales-order-status.dto';
@@ -24,6 +26,7 @@ export class SalesOrdersController {
     private readonly getSalesOrderByIdUseCase: GetSalesOrderByIdUseCase,
     private readonly scheduleDeliveryUseCase: ScheduleDeliveryUseCase,
     private readonly rescheduleDeliveryUseCase: RescheduleDeliveryUseCase,
+    private readonly changeSalesOrderTransportUseCase: ChangeSalesOrderTransportUseCase,
   ) {}
 
   @Post()
@@ -42,27 +45,16 @@ export class SalesOrdersController {
 
   @Get()
   @ApiOperation({ summary: 'Listar ordens de venda' })
-  @ApiQuery({ name: 'status', enum: OrderStatus, required: false })
-  @ApiQuery({ name: 'customerId', required: false })
-  @ApiQuery({ name: 'transportTypeId', required: false })
-  @ApiQuery({ name: 'itemId', required: false })
-  @ApiQuery({ name: 'dateFrom', required: false })
-  @ApiQuery({ name: 'dateTo', required: false })
-  async findAll(
-    @Query('status') status?: OrderStatus,
-    @Query('customerId') customerId?: string,
-    @Query('transportTypeId') transportTypeId?: string,
-    @Query('itemId') itemId?: string,
-    @Query('dateFrom') dateFrom?: string,
-    @Query('dateTo') dateTo?: string,
-  ): Promise<SalesOrderEntity[]> {
+  async findAll(@Query() query: GetSalesOrdersQueryDto): Promise<SalesOrderEntity[]> {
     return this.getSalesOrdersUseCase.execute({
-      status,
-      customerId,
-      transportTypeId,
-      itemId,
-      dateFrom: dateFrom ? new Date(dateFrom) : undefined,
-      dateTo: dateTo ? new Date(dateTo) : undefined,
+      status: query.status,
+      customerId: query.customerId,
+      transportTypeId: query.transportTypeId,
+      itemId: query.itemId,
+      dateFrom: query.dateFrom ? new Date(query.dateFrom) : undefined,
+      dateTo: query.dateTo ? new Date(query.dateTo) : undefined,
+      page: query.page,
+      limit: query.limit,
     });
   }
 
@@ -109,6 +101,18 @@ export class SalesOrdersController {
       deliveryDate: new Date(dto.deliveryDate),
       windowStart: new Date(dto.windowStart),
       windowEnd: new Date(dto.windowEnd),
+    });
+  }
+
+  @Put(':id/transport')
+  @ApiOperation({ summary: 'Alterar transporte da ordem de venda' })
+  async changeTransport(
+    @Param('id') id: string,
+    @Body() dto: ChangeSalesOrderTransportDto,
+  ): Promise<SalesOrderEntity> {
+    return this.changeSalesOrderTransportUseCase.execute({
+      salesOrderId: id,
+      transportTypeId: dto.transportTypeId,
     });
   }
 }

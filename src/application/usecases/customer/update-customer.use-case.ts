@@ -28,11 +28,15 @@ export class UpdateCustomerUseCase {
     }
 
     if (input.authorizedTransportTypeIds) {
-      for (const transportTypeId of input.authorizedTransportTypeIds) {
-        const transportType = await this.transportTypeRepository.findById(transportTypeId);
-        if (!transportType) {
-          throw new DomainException(`Tipo de transporte ${transportTypeId} não encontrado.`);
-        }
+      const foundTransportTypes = await this.transportTypeRepository.findByIds(
+        input.authorizedTransportTypeIds,
+      );
+      if (foundTransportTypes.length !== input.authorizedTransportTypeIds.length) {
+        const missing = input.authorizedTransportTypeIds.filter(
+          (id): boolean =>
+            !foundTransportTypes.some((transportType): boolean => transportType.id === id),
+        );
+        throw new DomainException(`Tipos de transporte não encontrados: ${missing.join(', ')}`);
       }
     }
 

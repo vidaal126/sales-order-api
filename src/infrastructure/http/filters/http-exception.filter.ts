@@ -1,4 +1,5 @@
 import { DomainException } from '@domain/exceptions/domain.exception';
+import { Prisma } from '@infrastructure/database/generated/client';
 import {
   type ArgumentsHost,
   Catch,
@@ -57,6 +58,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
   private resolveHttpStatus(exception: unknown): number {
     if (exception instanceof HttpException) return exception.getStatus();
     if (exception instanceof DuplicateRequestException) return HttpStatus.CONFLICT;
+    if (exception instanceof Prisma.PrismaClientKnownRequestError && exception.code === 'P2002') {
+      return HttpStatus.CONFLICT;
+    }
     if (exception instanceof DomainNotFoundException) return HttpStatus.NOT_FOUND;
     if (exception instanceof ValidationException) return HttpStatus.BAD_REQUEST;
     if (exception instanceof DomainUnauthorizedException) return HttpStatus.UNAUTHORIZED;
@@ -68,6 +72,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
   }
 
   private resolveErrorMessage(exception: unknown): string {
+    if (exception instanceof Prisma.PrismaClientKnownRequestError && exception.code === 'P2002') {
+      return 'Recurso já existe.';
+    }
     if (exception instanceof HttpException) {
       const response = exception.getResponse();
       if (typeof response === 'string') return response;
@@ -83,6 +90,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
   private resolveErrorName(exception: unknown): string {
     if (exception instanceof HttpException) return exception.constructor.name;
     if (exception instanceof DomainException) return exception.constructor.name;
+    if (exception instanceof Prisma.PrismaClientKnownRequestError && exception.code === 'P2002') {
+      return 'ConflictException';
+    }
     return 'InternalServerError';
   }
 }
