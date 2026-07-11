@@ -9,6 +9,6 @@ export class PrismaUnitOfWork extends IUnitOfWork {
   }
 
   execute<T>(work: (tx: unknown) => Promise<T>): Promise<T> {
-    return this.prisma.$transaction((tx) => work(tx));
+    return this.prisma.$transaction((tx): Promise<T> => work(tx));
   }
 }

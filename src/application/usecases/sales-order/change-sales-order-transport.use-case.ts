@@ -39,9 +39,7 @@ export class ChangeSalesOrderTransportUseCase {
       async (tx): Promise<ChangeTransportResult> => {
         const order = await this.salesOrderRepository.findById(input.salesOrderId, tx);
         if (!order) {
-          throw new DomainNotFoundException(
-            `Ordem de venda ${input.salesOrderId} não encontrada.`,
-          );
+          throw new DomainNotFoundException(`Ordem de venda ${input.salesOrderId} não encontrada.`);
         }
 
         if (TRANSPORT_LOCKED_STATUSES.includes(order.status)) {

@@ -1,6 +1,6 @@
 import { ItemEntity } from '@domain/entities/item.entity';
 import { IItemRepository } from '@domain/repositories/item.repository';
-import { resolvePageSize, type PaginationParams } from '@domain/repositories/pagination';
+import { type PaginationParams, resolvePageSize } from '@domain/repositories/pagination';
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma/prisma.service';
 

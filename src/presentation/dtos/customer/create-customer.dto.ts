@@ -1,4 +1,6 @@
+import { normalizeCpf, normalizePhone } from '@common/utils/normalization';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsEmail,
@@ -18,6 +20,7 @@ export class CreateCustomerDto {
   @ApiProperty({ example: '123.456.789-00' })
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }): unknown => normalizeCpf(value))
   @Matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, {
     message: 'document must be a valid CPF in the format XXX.XXX.XXX-XX',
   })
@@ -30,6 +33,7 @@ export class CreateCustomerDto {
 
   @ApiPropertyOptional({ example: '(61) 99999-9999' })
   @IsString()
+  @Transform(({ value }): unknown => normalizePhone(value))
   @Matches(/^\(\d{2}\) \d{4,5}-\d{4}$/, {
     message: 'phone must be in the format (XX) XXXXX-XXXX',
   })

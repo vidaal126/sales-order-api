@@ -1,7 +1,7 @@
-import type { SalesOrderEntity } from "@domain/entities/sales-order.entity";
-import { ISalesOrderRepository } from "@domain/repositories/sales-order.repository";
-import { DomainNotFoundException } from "@infrastructure/http/exceptions/not-found.exception";
-import { Inject, Injectable } from "@nestjs/common";
+import type { SalesOrderEntity } from '@domain/entities/sales-order.entity';
+import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
+import { DomainNotFoundException } from '@infrastructure/http/exceptions/not-found.exception';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetSalesOrderByIdUseCase {
