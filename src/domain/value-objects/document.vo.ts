@@ -1,3 +1,4 @@
+import { isValidCpf } from '@common/utils/cpf';
 import { normalizeCpf } from '@common/utils/normalization';
 import { DomainException } from '@domain/exceptions/domain.exception';
 
@@ -14,6 +15,9 @@ export class Document {
     const normalized = typeof value === 'string' ? (normalizeCpf(value) as string) : value;
     if (!DOCUMENT_PATTERN.test(normalized)) {
       throw new DomainException(`Documento ${value} inválido: formato esperado XXX.XXX.XXX-XX.`);
+    }
+    if (!isValidCpf(normalized)) {
+      throw new DomainException(`Documento ${value} inválido: dígitos verificadores incorretos.`);
     }
     return new Document(normalized);
   }
