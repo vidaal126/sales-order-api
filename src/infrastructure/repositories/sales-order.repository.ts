@@ -84,8 +84,9 @@ export class SalesOrderRepository extends ISalesOrderRepository {
     return orders.map((order): SalesOrderEntity => this.toDomain(order));
   }
 
-  async create(order: SalesOrderEntity): Promise<SalesOrderEntity> {
-    const created = await this.prisma.salesOrder.create({
+  async create(order: SalesOrderEntity, tx?: unknown): Promise<SalesOrderEntity> {
+    const client = (tx as Prisma.TransactionClient) ?? this.prisma;
+    const created = await client.salesOrder.create({
       data: {
         id: order.id,
         customerId: order.customerId,

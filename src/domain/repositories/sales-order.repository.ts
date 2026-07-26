@@ -14,6 +14,6 @@ export interface SalesOrderFilters extends PaginationParams {
 export abstract class ISalesOrderRepository {
   abstract findById(id: string, tx?: unknown): Promise<SalesOrderEntity | undefined>;
   abstract findAll(filters?: SalesOrderFilters): Promise<SalesOrderEntity[]>;
-  abstract create(salesOrder: SalesOrderEntity): Promise<SalesOrderEntity>;
+  abstract create(salesOrder: SalesOrderEntity, tx?: unknown): Promise<SalesOrderEntity>;
   abstract update(salesOrder: SalesOrderEntity, tx?: unknown): Promise<SalesOrderEntity>;
 }

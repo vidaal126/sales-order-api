@@ -2,14 +2,16 @@ import { CustomerEntity } from '@domain/entities/customer.entity';
 import type { ICustomerRepository } from '@domain/repositories/customer.repository';
 import { type PaginationParams, resolvePageSize } from '@domain/repositories/pagination';
 import { Inject, Injectable } from '@nestjs/common';
+import type { Prisma } from '../database/generated/client';
 import { PrismaService } from '../database/prisma/prisma.service';
 
 @Injectable()
 export class CustomerRepository implements ICustomerRepository {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  async findById(id: string): Promise<CustomerEntity | undefined> {
-    const customer = await this.prisma.customer.findUnique({
+  async findById(id: string, tx?: unknown): Promise<CustomerEntity | undefined> {
+    const client = (tx as Prisma.TransactionClient) ?? this.prisma;
+    const customer = await client.customer.findUnique({
       where: { id },
       include: { authorizedTransports: true },
     });
