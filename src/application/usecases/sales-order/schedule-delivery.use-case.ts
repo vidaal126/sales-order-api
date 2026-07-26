@@ -48,16 +48,11 @@ export class ScheduleDeliveryUseCase {
         throw new DomainException(`Ordem de venda ${input.salesOrderId} já possui agendamento.`);
       }
 
-      if (input.windowStart >= input.windowEnd) {
-        throw new DomainException(
-          `Janela de atendimento inválida: início deve ser anterior ao fim.`,
-        );
-      }
-
-      const now = new Date();
-      if (input.deliveryDate < now || input.windowStart < now) {
-        throw new DomainException('Não é possível agendar uma entrega em data passada.');
-      }
+      SchedulingEntity.validateWindow({
+        deliveryDate: input.deliveryDate,
+        windowStart: input.windowStart,
+        windowEnd: input.windowEnd,
+      });
 
       const scheduling = new SchedulingEntity({
         id: randomUUID(),
