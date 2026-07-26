@@ -2,6 +2,7 @@ import { ItemEntity } from '@domain/entities/item.entity';
 import { IItemRepository } from '@domain/repositories/item.repository';
 import { type PaginationParams, resolvePageSize } from '@domain/repositories/pagination';
 import { Inject, Injectable } from '@nestjs/common';
+import type { Prisma } from '../database/generated/client';
 import { PrismaService } from '../database/prisma/prisma.service';
 
 @Injectable()
@@ -56,8 +57,9 @@ export class ItemRepository extends IItemRepository {
     );
   }
 
-  async findByIds(ids: string[]): Promise<ItemEntity[]> {
-    const items = await this.prisma.item.findMany({ where: { id: { in: ids } } });
+  async findByIds(ids: string[], tx?: unknown): Promise<ItemEntity[]> {
+    const client = (tx as Prisma.TransactionClient) ?? this.prisma;
+    const items = await client.item.findMany({ where: { id: { in: ids } } });
     return items.map(
       (i): ItemEntity =>
         new ItemEntity({

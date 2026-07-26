@@ -5,6 +5,7 @@ import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
 import type { IEventEmitter } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
+import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
 import type { ICustomerRepository } from '@domain/repositories/customer.repository';
 import type { IItemRepository } from '@domain/repositories/item.repository';
 import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
@@ -36,6 +37,10 @@ const mockSalesOrderRepository: ISalesOrderRepository = {
 
 const mockEventEmitter: IEventEmitter = {
   emit: vi.fn(),
+};
+
+const mockUnitOfWork: IUnitOfWork = {
+  execute: <T>(work: (tx: unknown) => Promise<T>): Promise<T> => work({}),
 };
 
 const makeCustomer = (authorizedTransportTypeIds: string[]): CustomerEntity =>
@@ -78,6 +83,7 @@ describe('CreateSalesOrderUseCase', (): void => {
       mockCustomerRepository,
       mockItemRepository,
       mockEventEmitter,
+      mockUnitOfWork,
     );
   });
 

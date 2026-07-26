@@ -5,6 +5,7 @@ import { OrderStatus } from '@domain/enums/order-status.enum';
 import type { IEventEmitter } from '@domain/events/event-emitter.port';
 import { EVENT_EMITTER_PORT } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
+import { IUnitOfWork } from '@domain/ports/unit-of-work.port';
 import { ICustomerRepository } from '@domain/repositories/customer.repository';
 import { IItemRepository } from '@domain/repositories/item.repository';
 import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
@@ -31,53 +32,63 @@ export class CreateSalesOrderUseCase {
     private readonly itemRepository: IItemRepository,
     @Inject(EVENT_EMITTER_PORT)
     private readonly eventEmitter: IEventEmitter,
+    @Inject(IUnitOfWork)
+    private readonly unitOfWork: IUnitOfWork,
   ) {}
 
   async execute(input: CreateSalesOrderInput): Promise<SalesOrderEntity> {
-    const customer = await this.customerRepository.findById(input.customerId);
-    if (!customer) {
-      throw new DomainException(`Cliente ${input.customerId} não encontrado.`);
-    }
-
-    if (!customer.isTransportAuthorized(input.transportTypeId)) {
-      throw new DomainException(
-        `Tipo de transporte ${input.transportTypeId} não autorizado para o cliente ${customer.name}.`,
-      );
-    }
-
-    const itemIds = input.items.map((i): string => i.itemId);
-    const foundItems = await this.itemRepository.findByIds(itemIds);
-
-    if (foundItems.length !== itemIds.length) {
-      const foundIds = foundItems.map((i): string => i.id);
-      const missing = itemIds.filter((id): boolean => !foundIds.includes(id));
-      throw new DomainException(`Itens não encontrados: ${missing.join(', ')}`);
-    }
-
-    const orderItems = input.items.map((inputItem): SalesOrderItemEntity => {
-      const item = foundItems.find((i): boolean => i.id === inputItem.itemId);
-      if (!item) {
-        throw new DomainException(`Item ${inputItem.itemId} não encontrado.`);
+    const created = await this.unitOfWork.execute(async (tx): Promise<SalesOrderEntity> => {
+      const customer = await this.customerRepository.findById(input.customerId, tx);
+      if (!customer) {
+        throw new DomainException(`Cliente ${input.customerId} não encontrado.`);
       }
-      return new SalesOrderItemEntity({
-        itemId: item.id,
-        quantity: inputItem.quantity,
-        unitPrice: item.unitPrice,
+
+      if (!customer.isTransportAuthorized(input.transportTypeId)) {
+        throw new DomainException(
+          `Tipo de transporte ${input.transportTypeId} não autorizado para o cliente ${customer.name}.`,
+        );
+      }
+
+      const itemIds = input.items.map((i): string => i.itemId);
+      if (new Set(itemIds).size !== itemIds.length) {
+        throw new DomainException(
+          'A ordem de venda não pode conter o mesmo item em mais de uma linha.',
+        );
+      }
+
+      const foundItems = await this.itemRepository.findByIds(itemIds, tx);
+
+      if (foundItems.length !== itemIds.length) {
+        const foundIds = foundItems.map((i): string => i.id);
+        const missing = itemIds.filter((id): boolean => !foundIds.includes(id));
+        throw new DomainException(`Itens não encontrados: ${missing.join(', ')}`);
+      }
+
+      const orderItems = input.items.map((inputItem): SalesOrderItemEntity => {
+        const item = foundItems.find((i): boolean => i.id === inputItem.itemId);
+        if (!item) {
+          throw new DomainException(`Item ${inputItem.itemId} não encontrado.`);
+        }
+        return new SalesOrderItemEntity({
+          itemId: item.id,
+          quantity: inputItem.quantity,
+          unitPrice: item.unitPrice,
+        });
       });
-    });
 
-    const order = new SalesOrderEntity({
-      id: randomUUID(),
-      customerId: customer.id,
-      transportTypeId: input.transportTypeId,
-      status: OrderStatus.CRIADA,
-      notes: input.notes,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      items: orderItems,
-    });
+      const order = new SalesOrderEntity({
+        id: randomUUID(),
+        customerId: customer.id,
+        transportTypeId: input.transportTypeId,
+        status: OrderStatus.CRIADA,
+        notes: input.notes,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        items: orderItems,
+      });
 
-    const created = await this.salesOrderRepository.create(order);
+      return this.salesOrderRepository.create(order, tx);
+    });
 
     this.eventEmitter.emit('order.created', {
       orderId: created.id,
