@@ -8,6 +8,7 @@ import {
   IsPositive,
   IsString,
   IsUUID,
+  Max,
   ValidateNested,
 } from 'class-validator';
 
@@ -19,6 +20,7 @@ export class CreateSalesOrderItemDto {
   @ApiProperty({ example: 2 })
   @IsInt()
   @IsPositive()
+  @Max(10_000)
   quantity!: number;
 }
 

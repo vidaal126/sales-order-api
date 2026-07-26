@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, Max } from 'class-validator';
 
 export class CreateItemDto {
   @ApiProperty({ example: 'SKU-001' })
@@ -18,7 +18,8 @@ export class CreateItemDto {
   description?: string;
 
   @ApiProperty({ example: 29.9 })
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @IsPositive()
+  @Max(1_000_000)
   unitPrice!: number;
 }
