@@ -42,7 +42,7 @@ const makeCustomer = (authorizedTransportTypeIds: string[]): CustomerEntity =>
   new CustomerEntity({
     id: 'customer-id',
     name: 'João Silva',
-    document: '123.456.789-00',
+    document: '123.456.789-09',
     createdAt: new Date(),
     updatedAt: new Date(),
     authorizedTransportTypeIds,
