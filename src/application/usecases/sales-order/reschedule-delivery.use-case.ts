@@ -42,8 +42,10 @@ export class RescheduleDeliveryUseCase {
           throw new DomainNotFoundException(`Ordem de venda ${input.salesOrderId} não encontrada.`);
         }
 
-        if (order.status === OrderStatus.ENTREGUE) {
-          throw new DomainException(`Não é possível reagendar a entrega de uma ordem já entregue.`);
+        if (order.status !== OrderStatus.AGENDADA) {
+          throw new DomainException(
+            `Só é possível reagendar ordens no status AGENDADA. Status atual: ${order.status}.`,
+          );
         }
 
         const existing = await this.schedulingRepository.findBySalesOrderId(input.salesOrderId, tx);
@@ -53,16 +55,11 @@ export class RescheduleDeliveryUseCase {
           );
         }
 
-        if (input.windowStart >= input.windowEnd) {
-          throw new DomainException(
-            `Janela de atendimento inválida: início deve ser anterior ao fim.`,
-          );
-        }
-
-        const now = new Date();
-        if (input.deliveryDate < now || input.windowStart < now) {
-          throw new DomainException('Não é possível reagendar uma entrega para data passada.');
-        }
+        SchedulingEntity.validateWindow({
+          deliveryDate: input.deliveryDate,
+          windowStart: input.windowStart,
+          windowEnd: input.windowEnd,
+        });
 
         const updated = new SchedulingEntity({
           id: existing.id,
