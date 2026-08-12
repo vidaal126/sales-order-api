@@ -1,14 +1,12 @@
 import { AuditLogEntity } from '@domain/entities/audit-log.entity';
 import type { AuditAction } from '@domain/enums/audit-action.enum';
-import { IAuditLogRepository } from '@domain/repositories/audit-log.repository';
+import type { IAuditLogRepository } from '@domain/repositories/audit-log.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma/prisma.service';
 
 @Injectable()
-export class AuditLogRepository extends IAuditLogRepository {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {
-    super();
-  }
+export class AuditLogRepository implements IAuditLogRepository {
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async create(auditLog: AuditLogEntity): Promise<AuditLogEntity> {
     const created = await this.prisma.auditLog.create({

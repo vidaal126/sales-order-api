@@ -4,10 +4,15 @@ import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
 import type { IEventEmitter } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
-import { ICustomerRepository } from '@domain/repositories/customer.repository';
-import { IItemRepository } from '@domain/repositories/item.repository';
+import type { ICustomerRepository } from '@domain/repositories/customer.repository';
+import type { IItemRepository } from '@domain/repositories/item.repository';
 import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
-import { EVENT_EMITTER, SALES_ORDER_REPOSITORY } from '@infrastructure/di-tokens';
+import {
+  CUSTOMER_REPOSITORY,
+  EVENT_EMITTER,
+  ITEM_REPOSITORY,
+  SALES_ORDER_REPOSITORY,
+} from '@infrastructure/di-tokens';
 import { Inject, Injectable } from '@nestjs/common';
 
 export interface CreateSalesOrderInput {
@@ -25,9 +30,9 @@ export class CreateSalesOrderUseCase {
   constructor(
     @Inject(SALES_ORDER_REPOSITORY)
     private readonly salesOrderRepository: ISalesOrderRepository,
-    @Inject(ICustomerRepository)
+    @Inject(CUSTOMER_REPOSITORY)
     private readonly customerRepository: ICustomerRepository,
-    @Inject(IItemRepository)
+    @Inject(ITEM_REPOSITORY)
     private readonly itemRepository: IItemRepository,
     @Inject(EVENT_EMITTER)
     private readonly eventEmitter: IEventEmitter,

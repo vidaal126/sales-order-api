@@ -1,6 +1,6 @@
 import { CreateItemUseCase } from '@application/usecases/item/create-item.use-case';
 import { GetItemsUseCase } from '@application/usecases/item/get-items.use-case';
-import { IItemRepository } from '@domain/repositories/item.repository';
+import { ITEM_REPOSITORY } from '@infrastructure/di-tokens';
 import { ItemRepository } from '@infrastructure/repositories/item.repository';
 import { Module } from '@nestjs/common';
 import { ItemsController } from '@presentation/controllers/v1/items.controller';
@@ -8,10 +8,10 @@ import { ItemsController } from '@presentation/controllers/v1/items.controller';
 @Module({
   controllers: [ItemsController],
   providers: [
-    { provide: IItemRepository, useClass: ItemRepository },
+    { provide: ITEM_REPOSITORY, useClass: ItemRepository },
     CreateItemUseCase,
     GetItemsUseCase,
   ],
-  exports: [IItemRepository],
+  exports: [ITEM_REPOSITORY],
 })
 export class ItemModule {}

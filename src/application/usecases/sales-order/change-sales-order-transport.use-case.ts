@@ -4,9 +4,14 @@ import type { IEventEmitter } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
 import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
 import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
-import { ICustomerRepository } from '@domain/repositories/customer.repository';
+import type { ICustomerRepository } from '@domain/repositories/customer.repository';
 import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
-import { EVENT_EMITTER, SALES_ORDER_REPOSITORY, UNIT_OF_WORK } from '@infrastructure/di-tokens';
+import {
+  CUSTOMER_REPOSITORY,
+  EVENT_EMITTER,
+  SALES_ORDER_REPOSITORY,
+  UNIT_OF_WORK,
+} from '@infrastructure/di-tokens';
 import { Inject, Injectable } from '@nestjs/common';
 
 export interface ChangeSalesOrderTransportInput {
@@ -21,7 +26,7 @@ export class ChangeSalesOrderTransportUseCase {
   constructor(
     @Inject(SALES_ORDER_REPOSITORY)
     private readonly salesOrderRepository: ISalesOrderRepository,
-    @Inject(ICustomerRepository)
+    @Inject(CUSTOMER_REPOSITORY)
     private readonly customerRepository: ICustomerRepository,
     @Inject(EVENT_EMITTER)
     private readonly eventEmitter: IEventEmitter,

@@ -1,10 +1,10 @@
 import type { ItemEntity } from '@domain/entities/item.entity';
 import type { PaginationParams } from '@domain/repositories/pagination';
 
-export abstract class IItemRepository {
-  abstract findById(id: string): Promise<ItemEntity | undefined>;
-  abstract findAll(params?: PaginationParams): Promise<ItemEntity[]>;
-  abstract findBySku(sku: string): Promise<ItemEntity | undefined>;
-  abstract findByIds(ids: string[]): Promise<ItemEntity[]>;
-  abstract create(item: ItemEntity): Promise<ItemEntity>;
+export interface IItemRepository {
+  findById(id: string): Promise<ItemEntity | undefined>;
+  findAll(params?: PaginationParams): Promise<ItemEntity[]>;
+  findBySku(sku: string): Promise<ItemEntity | undefined>;
+  findByIds(ids: string[]): Promise<ItemEntity[]>;
+  create(item: ItemEntity): Promise<ItemEntity>;
 }

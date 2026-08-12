@@ -1,14 +1,12 @@
 import { ItemEntity } from '@domain/entities/item.entity';
-import { IItemRepository } from '@domain/repositories/item.repository';
+import type { IItemRepository } from '@domain/repositories/item.repository';
 import { type PaginationParams, resolvePageSize } from '@domain/repositories/pagination';
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma/prisma.service';
 
 @Injectable()
-export class ItemRepository extends IItemRepository {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {
-    super();
-  }
+export class ItemRepository implements IItemRepository {
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<ItemEntity | undefined> {
     const item = await this.prisma.item.findUnique({ where: { id } });

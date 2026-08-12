@@ -5,11 +5,11 @@ import { GetSalesOrdersUseCase } from '@application/usecases/sales-order/get-sal
 import { RescheduleDeliveryUseCase } from '@application/usecases/sales-order/reschedule-delivery.use-case';
 import { ScheduleDeliveryUseCase } from '@application/usecases/sales-order/schedule-delivery.use-case';
 import { UpdateSalesOrderStatusUseCase } from '@application/usecases/sales-order/update-sales-order-status.use-case';
-import { IAuditLogRepository } from '@domain/repositories/audit-log.repository';
-import { ICustomerRepository } from '@domain/repositories/customer.repository';
-import { IItemRepository } from '@domain/repositories/item.repository';
 import {
+  AUDIT_LOG_REPOSITORY,
+  CUSTOMER_REPOSITORY,
   EVENT_EMITTER,
+  ITEM_REPOSITORY,
   SALES_ORDER_REPOSITORY,
   SCHEDULING_REPOSITORY,
 } from '@infrastructure/di-tokens';
@@ -28,10 +28,10 @@ import { SalesOrdersController } from '@presentation/controllers/v1/sales-orders
   controllers: [SalesOrdersController],
   providers: [
     { provide: SALES_ORDER_REPOSITORY, useClass: SalesOrderRepository },
-    { provide: ICustomerRepository, useClass: CustomerRepository },
-    { provide: IItemRepository, useClass: ItemRepository },
+    { provide: CUSTOMER_REPOSITORY, useClass: CustomerRepository },
+    { provide: ITEM_REPOSITORY, useClass: ItemRepository },
     { provide: SCHEDULING_REPOSITORY, useClass: SchedulingRepository },
-    { provide: IAuditLogRepository, useClass: AuditLogRepository },
+    { provide: AUDIT_LOG_REPOSITORY, useClass: AuditLogRepository },
     { provide: EVENT_EMITTER, useExisting: EventEmitter2 },
     AuditListener,
     CreateSalesOrderUseCase,

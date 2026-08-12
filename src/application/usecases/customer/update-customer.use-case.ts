@@ -1,7 +1,8 @@
 import { CustomerEntity } from '@domain/entities/customer.entity';
 import { DomainException } from '@domain/exceptions/domain.exception';
-import { ICustomerRepository } from '@domain/repositories/customer.repository';
-import { ITransportTypeRepository } from '@domain/repositories/transport-type.repository';
+import type { ICustomerRepository } from '@domain/repositories/customer.repository';
+import type { ITransportTypeRepository } from '@domain/repositories/transport-type.repository';
+import { CUSTOMER_REPOSITORY, TRANSPORT_TYPE_REPOSITORY } from '@infrastructure/di-tokens';
 import { Inject, Injectable } from '@nestjs/common';
 
 export interface UpdateCustomerInput {
@@ -15,9 +16,9 @@ export interface UpdateCustomerInput {
 @Injectable()
 export class UpdateCustomerUseCase {
   constructor(
-    @Inject(ICustomerRepository)
+    @Inject(CUSTOMER_REPOSITORY)
     private readonly customerRepository: ICustomerRepository,
-    @Inject(ITransportTypeRepository)
+    @Inject(TRANSPORT_TYPE_REPOSITORY)
     private readonly transportTypeRepository: ITransportTypeRepository,
   ) {}
 
