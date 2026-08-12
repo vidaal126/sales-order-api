@@ -7,6 +7,13 @@ import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exc
 import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
 import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
 import type { ISchedulingRepository } from '@domain/repositories/scheduling.repository';
+import {
+  EVENT_EMITTER,
+  SALES_ORDER_REPOSITORY,
+  SCHEDULING_REPOSITORY,
+  UNIT_OF_WORK,
+} from '@infrastructure/di-tokens';
+import { Inject, Injectable } from '@nestjs/common';
 
 export interface ScheduleDeliveryInput {
   salesOrderId: string;
@@ -15,11 +22,16 @@ export interface ScheduleDeliveryInput {
   windowEnd: Date;
 }
 
+@Injectable()
 export class ScheduleDeliveryUseCase {
   constructor(
+    @Inject(SALES_ORDER_REPOSITORY)
     private readonly salesOrderRepository: ISalesOrderRepository,
+    @Inject(SCHEDULING_REPOSITORY)
     private readonly schedulingRepository: ISchedulingRepository,
+    @Inject(EVENT_EMITTER)
     private readonly eventEmitter: IEventEmitter,
+    @Inject(UNIT_OF_WORK)
     private readonly unitOfWork: IUnitOfWork,
   ) {}
 
@@ -44,6 +56,12 @@ export class ScheduleDeliveryUseCase {
         if (existing) {
           throw new DomainException(`Ordem de venda ${input.salesOrderId} já possui agendamento.`);
         }
+
+        SchedulingEntity.validateWindow({
+          deliveryDate: input.deliveryDate,
+          windowStart: input.windowStart,
+          windowEnd: input.windowEnd,
+        });
 
         const scheduling = new SchedulingEntity({
           id: randomUUID(),
