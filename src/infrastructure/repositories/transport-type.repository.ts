@@ -1,13 +1,11 @@
 import { TransportTypeEntity } from '@domain/entities/transport-type.entity';
-import { ITransportTypeRepository } from '@domain/repositories/transport-type.repository';
+import type { ITransportTypeRepository } from '@domain/repositories/transport-type.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma/prisma.service';
 
 @Injectable()
-export class TransportTypeRepository extends ITransportTypeRepository {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {
-    super();
-  }
+export class TransportTypeRepository implements ITransportTypeRepository {
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<TransportTypeEntity | undefined> {
     const transportType = await this.prisma.transportType.findUnique({ where: { id } });

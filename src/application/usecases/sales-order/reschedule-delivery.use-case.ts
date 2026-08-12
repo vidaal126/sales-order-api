@@ -1,12 +1,17 @@
 import { SchedulingEntity } from '@domain/entities/scheduling.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
 import type { IEventEmitter } from '@domain/events/event-emitter.port';
-import { EVENT_EMITTER_PORT } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
-import { IUnitOfWork } from '@domain/ports/unit-of-work.port';
-import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
-import { ISchedulingRepository } from '@domain/repositories/scheduling.repository';
-import { DomainNotFoundException } from '@infrastructure/http/exceptions/not-found.exception';
+import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
+import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
+import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
+import type { ISchedulingRepository } from '@domain/repositories/scheduling.repository';
+import {
+  EVENT_EMITTER,
+  SALES_ORDER_REPOSITORY,
+  SCHEDULING_REPOSITORY,
+  UNIT_OF_WORK,
+} from '@infrastructure/di-tokens';
 import { Inject, Injectable } from '@nestjs/common';
 
 export interface RescheduleDeliveryInput {
@@ -19,13 +24,13 @@ export interface RescheduleDeliveryInput {
 @Injectable()
 export class RescheduleDeliveryUseCase {
   constructor(
-    @Inject(ISalesOrderRepository)
+    @Inject(SALES_ORDER_REPOSITORY)
     private readonly salesOrderRepository: ISalesOrderRepository,
-    @Inject(ISchedulingRepository)
+    @Inject(SCHEDULING_REPOSITORY)
     private readonly schedulingRepository: ISchedulingRepository,
-    @Inject(EVENT_EMITTER_PORT)
+    @Inject(EVENT_EMITTER)
     private readonly eventEmitter: IEventEmitter,
-    @Inject(IUnitOfWork)
+    @Inject(UNIT_OF_WORK)
     private readonly unitOfWork: IUnitOfWork,
   ) {}
 

@@ -1,12 +1,13 @@
 import type { CustomerEntity } from '@domain/entities/customer.entity';
-import { ICustomerRepository } from '@domain/repositories/customer.repository';
-import { DomainNotFoundException } from '@infrastructure/http/exceptions/not-found.exception';
+import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
+import type { ICustomerRepository } from '@domain/repositories/customer.repository';
+import { CUSTOMER_REPOSITORY } from '@infrastructure/di-tokens';
 import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetCustomerByIdUseCase {
   constructor(
-    @Inject(ICustomerRepository) private readonly customerRepository: ICustomerRepository,
+    @Inject(CUSTOMER_REPOSITORY) private readonly customerRepository: ICustomerRepository,
   ) {}
 
   async execute(id: string): Promise<CustomerEntity> {

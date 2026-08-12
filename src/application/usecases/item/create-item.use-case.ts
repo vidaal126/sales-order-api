@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { ItemEntity } from '@domain/entities/item.entity';
 import { DomainException } from '@domain/exceptions/domain.exception';
-import { IItemRepository } from '@domain/repositories/item.repository';
+import type { IItemRepository } from '@domain/repositories/item.repository';
+import { ITEM_REPOSITORY } from '@infrastructure/di-tokens';
 import { Inject, Injectable } from '@nestjs/common';
 
 export interface CreateItemInput {
@@ -13,7 +14,7 @@ export interface CreateItemInput {
 
 @Injectable()
 export class CreateItemUseCase {
-  constructor(@Inject(IItemRepository) private readonly itemRepository: IItemRepository) {}
+  constructor(@Inject(ITEM_REPOSITORY) private readonly itemRepository: IItemRepository) {}
 
   async execute(input: CreateItemInput): Promise<ItemEntity> {
     const existing = await this.itemRepository.findBySku(input.sku);

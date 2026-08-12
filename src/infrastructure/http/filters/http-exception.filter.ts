@@ -1,4 +1,5 @@
 import { DomainException } from '@domain/exceptions/domain.exception';
+import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
 import { Prisma } from '@infrastructure/database/generated/client';
 import {
   type ArgumentsHost,
@@ -13,7 +14,6 @@ import { BusinessRuleException } from '../exceptions/business-rule.exception';
 import { DuplicateRequestException } from '../exceptions/duplicate-request.exception';
 import { ExternalServiceException } from '../exceptions/external-service.exception';
 import { DomainForbiddenException } from '../exceptions/forbidden.exception';
-import { DomainNotFoundException } from '../exceptions/not-found.exception';
 import { DomainUnauthorizedException } from '../exceptions/unauthorized.exception';
 import { ValidationException } from '../exceptions/validation.exception';
 import type { RequestWithTrace } from '../interceptors/trace-id.interceptor';

@@ -1,14 +1,14 @@
-import { defineConfig } from "vitest/config";
-import { resolve } from "path";
+import { resolve } from 'path';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
     globals: true,
-    environment: "node",
-    root: "./",
+    environment: 'node',
+    root: './',
     coverage: {
-      provider: "v8",
-      include: ["src/**"],
+      provider: 'v8',
+      include: ['src/**'],
       thresholds: {
         lines: 80,
         branches: 80,
@@ -19,11 +19,11 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@domain": resolve(__dirname, "src/domain"),
-      "@application": resolve(__dirname, "src/application"),
-      "@infrastructure": resolve(__dirname, "src/infrastructure"),
-      "@presentation": resolve(__dirname, "src/presentation"),
-      "@common": resolve(__dirname, "src/common"),
+      '@domain': resolve(__dirname, 'src/domain'),
+      '@application': resolve(__dirname, 'src/application'),
+      '@infrastructure': resolve(__dirname, 'src/infrastructure'),
+      '@presentation': resolve(__dirname, 'src/presentation'),
+      '@common': resolve(__dirname, 'src/common'),
     },
   },
 });

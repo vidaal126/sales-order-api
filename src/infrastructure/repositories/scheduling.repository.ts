@@ -1,21 +1,22 @@
 import { SchedulingEntity } from '@domain/entities/scheduling.entity';
+import type { TransactionContext } from '@domain/ports/unit-of-work.port';
 import { ISchedulingRepository } from '@domain/repositories/scheduling.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import type { Prisma } from '../database/generated/client';
 import { PrismaService } from '../database/prisma/prisma.service';
 
 @Injectable()
-export class SchedulingRepository extends ISchedulingRepository {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {
-    super();
-  }
+export class SchedulingRepository implements ISchedulingRepository {
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async findBySalesOrderId(
     salesOrderId: string,
-    tx?: unknown,
+    transaction?: TransactionContext,
   ): Promise<SchedulingEntity | undefined> {
-    const client = (tx as Prisma.TransactionClient) ?? this.prisma;
-    const scheduling = await client.scheduling.findUnique({ where: { salesOrderId } });
+    const client = (transaction as Prisma.TransactionClient) ?? this.prisma;
+    const scheduling = await client.scheduling.findUnique({
+      where: { salesOrderId },
+    });
     if (!scheduling) return undefined;
     return new SchedulingEntity({
       id: scheduling.id,
@@ -30,8 +31,11 @@ export class SchedulingRepository extends ISchedulingRepository {
     });
   }
 
-  async create(scheduling: SchedulingEntity, tx?: unknown): Promise<SchedulingEntity> {
-    const client = (tx as Prisma.TransactionClient) ?? this.prisma;
+  async create(
+    scheduling: SchedulingEntity,
+    transaction?: TransactionContext,
+  ): Promise<SchedulingEntity> {
+    const client = (transaction as Prisma.TransactionClient) ?? this.prisma;
     const created = await client.scheduling.create({
       data: {
         id: scheduling.id,
@@ -56,8 +60,11 @@ export class SchedulingRepository extends ISchedulingRepository {
     });
   }
 
-  async update(scheduling: SchedulingEntity, tx?: unknown): Promise<SchedulingEntity> {
-    const client = (tx as Prisma.TransactionClient) ?? this.prisma;
+  async update(
+    scheduling: SchedulingEntity,
+    transaction?: TransactionContext,
+  ): Promise<SchedulingEntity> {
+    const client = (transaction as Prisma.TransactionClient) ?? this.prisma;
     const updated = await client.scheduling.update({
       where: { salesOrderId: scheduling.salesOrderId },
       data: {
