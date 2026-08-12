@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { TransportTypeEntity } from '@domain/entities/transport-type.entity';
 import { DomainException } from '@domain/exceptions/domain.exception';
-import { ITransportTypeRepository } from '@domain/repositories/transport-type.repository';
+import type { ITransportTypeRepository } from '@domain/repositories/transport-type.repository';
+import { TRANSPORT_TYPE_REPOSITORY } from '@infrastructure/di-tokens';
 import { Inject, Injectable } from '@nestjs/common';
 
 export interface CreateTransportTypeInput {
@@ -12,7 +13,7 @@ export interface CreateTransportTypeInput {
 @Injectable()
 export class CreateTransportTypeUseCase {
   constructor(
-    @Inject(ITransportTypeRepository)
+    @Inject(TRANSPORT_TYPE_REPOSITORY)
     private readonly transportTypeRepository: ITransportTypeRepository,
   ) {}
 

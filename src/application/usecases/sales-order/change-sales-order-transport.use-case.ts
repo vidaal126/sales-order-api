@@ -1,12 +1,17 @@
 import type { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
 import type { IEventEmitter } from '@domain/events/event-emitter.port';
-import { EVENT_EMITTER_PORT } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
-import { IUnitOfWork } from '@domain/ports/unit-of-work.port';
-import { ICustomerRepository } from '@domain/repositories/customer.repository';
-import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
-import { DomainNotFoundException } from '@infrastructure/http/exceptions/not-found.exception';
+import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
+import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
+import type { ICustomerRepository } from '@domain/repositories/customer.repository';
+import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
+import {
+  CUSTOMER_REPOSITORY,
+  EVENT_EMITTER,
+  SALES_ORDER_REPOSITORY,
+  UNIT_OF_WORK,
+} from '@infrastructure/di-tokens';
 import { Inject, Injectable } from '@nestjs/common';
 
 export interface ChangeSalesOrderTransportInput {
@@ -19,13 +24,13 @@ const TRANSPORT_LOCKED_STATUSES = [OrderStatus.EM_TRANSPORTE, OrderStatus.ENTREG
 @Injectable()
 export class ChangeSalesOrderTransportUseCase {
   constructor(
-    @Inject(ISalesOrderRepository)
+    @Inject(SALES_ORDER_REPOSITORY)
     private readonly salesOrderRepository: ISalesOrderRepository,
-    @Inject(ICustomerRepository)
+    @Inject(CUSTOMER_REPOSITORY)
     private readonly customerRepository: ICustomerRepository,
-    @Inject(EVENT_EMITTER_PORT)
+    @Inject(EVENT_EMITTER)
     private readonly eventEmitter: IEventEmitter,
-    @Inject(IUnitOfWork)
+    @Inject(UNIT_OF_WORK)
     private readonly unitOfWork: IUnitOfWork,
   ) {}
 

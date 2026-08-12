@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { AuditLogEntity } from '@domain/entities/audit-log.entity';
 import { AuditAction } from '@domain/enums/audit-action.enum';
-import { IAuditLogRepository } from '@domain/repositories/audit-log.repository';
+import type { IAuditLogRepository } from '@domain/repositories/audit-log.repository';
+import { AUDIT_LOG_REPOSITORY } from '@infrastructure/di-tokens';
 import { Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectPinoLogger, type PinoLogger } from 'nestjs-pino';
@@ -9,7 +10,7 @@ import { InjectPinoLogger, type PinoLogger } from 'nestjs-pino';
 @Injectable()
 export class AuditListener {
   constructor(
-    @Inject(IAuditLogRepository) private readonly auditLogRepository: IAuditLogRepository,
+    @Inject(AUDIT_LOG_REPOSITORY) private readonly auditLogRepository: IAuditLogRepository,
     @InjectPinoLogger(AuditListener.name)
     private readonly logger: PinoLogger,
   ) {}

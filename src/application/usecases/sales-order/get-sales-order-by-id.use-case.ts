@@ -1,12 +1,13 @@
 import type { SalesOrderEntity } from '@domain/entities/sales-order.entity';
-import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
-import { DomainNotFoundException } from '@infrastructure/http/exceptions/not-found.exception';
+import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
+import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
+import { SALES_ORDER_REPOSITORY } from '@infrastructure/di-tokens';
 import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetSalesOrderByIdUseCase {
   constructor(
-    @Inject(ISalesOrderRepository)
+    @Inject(SALES_ORDER_REPOSITORY)
     private readonly salesOrderRepository: ISalesOrderRepository,
   ) {}
 
