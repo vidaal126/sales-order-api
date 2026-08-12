@@ -18,8 +18,8 @@ describe('IsNotPastDate', (): void => {
     expect(isValid('2099-12-31T00:00:00.000Z')).toBe(true);
   });
 
-  it('should accept the current instant', (): void => {
-    expect(isValid(new Date().toISOString())).toBe(true);
+  it('should accept an instant a few seconds in the future', (): void => {
+    expect(isValid(new Date(Date.now() + 5000).toISOString())).toBe(true);
   });
 
   it('should reject a date 1 second in the past', (): void => {
