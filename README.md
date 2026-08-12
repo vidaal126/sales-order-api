@@ -20,7 +20,6 @@ API RESTful para gerenciamento do ciclo completo de Ordens de Venda — do cadas
 - [CI/CD](#cicd)
 - [Infraestrutura AWS](#infraestrutura-aws-terraform)
 - [Escalabilidade e Performance](#escalabilidade-e-performance)
-- [Trade-offs](#trade-offs)
 
 ---
 
@@ -43,7 +42,7 @@ Sistema de gerenciamento de ordens de venda desenvolvido com foco em arquitetura
 - Arquitetura Hexagonal (Ports & Adapters)
 - Domain-Driven Design (DDD)
 - SOLID Principles
-- Repository Pattern com abstract classes como tokens NestJS
+- Repository Pattern com tokens `Symbol` de DI centralizados (`infrastructure/di-tokens.ts`)
 - State Machine encapsulada na entidade de domínio
 - Event-Driven Audit desacoplado dos Use Cases
 - Stack de observabilidade completa (métricas, logs, dashboards)
@@ -189,25 +188,58 @@ yarn start:dev
 
 ## Endpoints da API
 
-Acesse a documentação interativa em: **http://localhost:3000/api/docs**
+Acesse a documentação interativa em: **http://localhost:3000/api/docs** (disponível apenas fora de produção)
 
-| Método | Rota                                | Descrição                    |
-| ------ | ----------------------------------- | ---------------------------- |
-| POST   | `/api/v1/customers`                 | Criar cliente                |
-| GET    | `/api/v1/customers`                 | Listar clientes              |
-| PUT    | `/api/v1/customers/:id`             | Atualizar cliente            |
-| POST   | `/api/v1/transport-types`           | Criar tipo de transporte     |
-| GET    | `/api/v1/transport-types`           | Listar tipos de transporte   |
-| PUT    | `/api/v1/transport-types/:id`       | Atualizar tipo de transporte |
-| POST   | `/api/v1/items`                     | Criar item                   |
-| GET    | `/api/v1/items`                     | Listar itens                 |
-| POST   | `/api/v1/sales-orders`              | Criar ordem de venda         |
-| GET    | `/api/v1/sales-orders`              | Listar ordens (com filtros)  |
-| GET    | `/api/v1/sales-orders/:id`          | Buscar ordem por ID          |
-| PUT    | `/api/v1/sales-orders/:id/status`   | Atualizar status da ordem    |
-| POST   | `/api/v1/sales-orders/:id/schedule` | Agendar entrega              |
-| PUT    | `/api/v1/sales-orders/:id/schedule` | Reagendar entrega            |
-| GET    | `/metrics`                          | Métricas Prometheus          |
+Cada endpoint no Swagger documenta o corpo esperado, os parâmetros de rota e todos os status de resposta possíveis — incluindo as regras de negócio que levam a cada erro.
+
+**Semântica dos status de erro:**
+
+| Status | Significado                                                                 |
+| ------ | ---------------------------------------------------------------------------- |
+| 400    | Falha de validação do payload ou query string (formato, tipo, campo faltando) |
+| 404    | Recurso não encontrado (`DomainNotFoundException`)                            |
+| 409    | Conflito de unicidade no banco                                                |
+| 422    | Regra de negócio violada (`DomainException`)                                  |
+| 429    | Limite de requisições excedido (throttler)                                    |
+| 500    | Erro interno não tratado                                                      |
+
+Toda resposta de erro segue o mesmo envelope, com `traceId` para correlação com os logs:
+
+```json
+{
+  "statusCode": 422,
+  "timestamp": "2026-08-12T23:00:00.000Z",
+  "path": "/api/v1/sales-orders",
+  "traceId": "01JB2X...",
+  "error": {
+    "message": "Tipo de transporte ... não autorizado para o cliente João Silva.",
+    "error": "DomainException",
+    "statusCode": 422
+  }
+}
+```
+
+| Método | Rota                                  | Descrição                                      |
+| ------ | -------------------------------------- | ----------------------------------------------- |
+| POST   | `/api/v1/customers`                    | Criar cliente                                   |
+| GET    | `/api/v1/customers`                    | Listar clientes (paginado: `?page=&limit=`)     |
+| GET    | `/api/v1/customers/:id`                | Buscar cliente por ID                           |
+| PUT    | `/api/v1/customers/:id`                | Atualizar cliente                               |
+| POST   | `/api/v1/transport-types`              | Criar tipo de transporte                        |
+| GET    | `/api/v1/transport-types`              | Listar tipos de transporte                      |
+| PUT    | `/api/v1/transport-types/:id`          | Atualizar tipo de transporte                    |
+| POST   | `/api/v1/items`                        | Criar item                                      |
+| GET    | `/api/v1/items`                        | Listar itens (paginado: `?page=&limit=`)        |
+| POST   | `/api/v1/sales-orders`                 | Criar ordem de venda                            |
+| GET    | `/api/v1/sales-orders`                 | Listar ordens (filtros + paginação)             |
+| GET    | `/api/v1/sales-orders/:id`             | Buscar ordem por ID                             |
+| PUT    | `/api/v1/sales-orders/:id/status`      | Atualizar status da ordem                       |
+| PUT    | `/api/v1/sales-orders/:id/transport`   | Trocar o transporte da ordem                    |
+| POST   | `/api/v1/sales-orders/:id/schedule`    | Agendar entrega                                 |
+| PUT    | `/api/v1/sales-orders/:id/schedule`    | Reagendar entrega                               |
+| GET    | `/metrics`                             | Métricas Prometheus (requer `Bearer METRICS_TOKEN`) |
+
+`GET /api/v1/sales-orders` aceita `status`, `customerId`, `transportTypeId`, `itemId`, `dateFrom` e `dateTo` como filtros (todos opcionais e validados — `status` precisa ser um valor válido do enum, `dateTo` não pode ser anterior a `dateFrom`).
 
 ---
 
@@ -264,6 +296,24 @@ curl -X POST http://localhost:3000/api/v1/sales-orders/ORDER_ID/schedule \
     "windowEnd": "2026-07-01T12:00:00.000Z"
   }'
 ```
+
+Regras de agendamento aplicadas em `SchedulingEntity.validateWindow` (domínio, não confia apenas na validação do DTO):
+
+- `windowStart` não pode estar no passado
+- `windowStart` deve ser anterior a `windowEnd`
+- `deliveryDate` não pode exceder o horizonte máximo de **365 dias** a partir de agora
+- a janela (`windowStart`/`windowEnd`) precisa ocorrer no mesmo dia (UTC) de `deliveryDate`
+- datas inválidas ou fora do intervalo representável por `Date` são rejeitadas com `DomainException`, nunca propagam um erro não tratado
+
+Reagendar só é permitido para ordens no status `AGENDADA`; `PUT .../schedule` valida o status atual antes de aceitar uma nova data.
+
+### 🇧🇷 Validação e Normalização de CPF e Telefone
+
+`document` e `phone` aceitam entrada com ou sem máscara (`12345678909` ou `123.456.789-09`) — são normalizados automaticamente. O CPF é validado por dígito verificador (não só formato), rejeitando sequências repetidas (`000.000.000-00`, `111.111.111-11`) que passariam num check ingênuo de tamanho.
+
+### 🚫 Troca de Transporte
+
+`PUT /api/v1/sales-orders/:id/transport` permite trocar o tipo de transporte de uma ordem já criada, desde que o novo transporte esteja autorizado para o cliente e a ordem ainda não esteja `EM_TRANSPORTE` ou `ENTREGUE`.
 
 ---
 
@@ -369,9 +419,12 @@ CORS_ORIGIN=http://localhost:3001
 
 # Logging
 LOG_LEVEL=info
+
+# Bearer token exigido para acessar GET /metrics
+METRICS_TOKEN=changeme
 ```
 
-> Em produção, altere `POSTGRESQL_PASSWORD` e configure `CORS_ORIGIN` com a origem real do frontend.
+> Em produção, altere `POSTGRESQL_PASSWORD` e `METRICS_TOKEN`, e configure `CORS_ORIGIN` com a origem real do frontend. Todas as variáveis são validadas na subida via Joi — a aplicação falha imediatamente se alguma obrigatória estiver ausente.
 
 ---
 
@@ -444,12 +497,14 @@ const VALID_TRANSITIONS = {
 
 ### Modelagem do Domínio
 
-| Entidade           | Responsabilidade                                                                 |
-| ------------------ | -------------------------------------------------------------------------------- |
-| `CustomerEntity`   | Guarda a lista de transportes autorizados e valida via `isTransportAuthorized()` |
-| `SalesOrderEntity` | Encapsula a state machine de status via `transitionTo()` e `canTransitionTo()`   |
-| `SchedulingEntity` | Controla agendamento e reagendamento de entregas                                 |
-| `AuditLogEntity`   | Registra todos os eventos relevantes com estado anterior e posterior             |
+| Entidade              | Responsabilidade                                                                 |
+| --------------------- | --------------------------------------------------------------------------------- |
+| `CustomerEntity`      | Guarda a lista de transportes autorizados e valida via `isTransportAuthorized()`; normaliza e valida CPF/telefone via `Document`/`Phone` |
+| `SalesOrderEntity`    | Encapsula a state machine de status via `transitionTo()` e `canTransitionTo()`; exige ao menos um item |
+| `SchedulingEntity`    | Valida a janela de entrega (`validateWindow`) e controla agendamento/reagendamento |
+| `ItemEntity`          | Item de catálogo (SKU, nome, preço)                                               |
+| `TransportTypeEntity` | Tipo de transporte disponível para autorização de clientes                        |
+| `AuditLogEntity`      | Registra todos os eventos relevantes com estado anterior e posterior              |
 
 ### Persistência
 
@@ -500,11 +555,15 @@ yarn test
 yarn test:cov
 ```
 
-**Cobertura atual:**
+**Cobertura atual:** 125 testes unitários (24 arquivos) + 2 testes de integração contra banco real.
 
-- **9 testes unitários** — State machine da `SalesOrderEntity`
-- **4 testes unitários** — `CreateSalesOrderUseCase` com mocks
-- **2 testes de integração** — `CreateSalesOrderUseCase` com banco real
+| Camada                    | O que é coberto                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Domínio                    | State machine de `SalesOrderEntity`; `SchedulingEntity.validateWindow` — incluindo datas inválidas (`NaN`), limites exatos do horizonte de 365 dias, datas extremas (ano 1900, ano 9999, mínimo/máximo representável por `Date`) |
+| Value Objects               | `Document` e `Phone` — formatos válidos/inválidos, com/sem máscara, sequências repetidas de CPF        |
+| Validators (DTO)            | `IsNotPastDate`, `IsDateAfterOrEqual` — mesmos casos extremos de data isolados da camada HTTP          |
+| Use Cases                   | Todos os 17 use cases (clientes, itens, tipos de transporte, ordens de venda: criar, listar, buscar, agendar, reagendar, trocar status, trocar transporte) — caminho feliz e todos os erros de negócio |
+| Integração                  | `CreateSalesOrderUseCase` fim a fim contra PostgreSQL real, sem mock do Prisma                          |
 
 Os testes de integração requerem um banco PostgreSQL rodando. Em CI, um service container PostgreSQL é provisionado automaticamente.
 
@@ -586,20 +645,6 @@ Os outputs incluem os valores necessários para configurar os GitHub Secrets do 
 - `WHERE id IN (...)` em vez de N queries individuais
 - `include` do Prisma usado estrategicamente para evitar N+1
 - Route templates (não URLs reais) nas métricas para baixa cardinalidade de labels
-
----
-
-## Trade-offs
-
-| Decisão                                 | Trade-off                                                                       |
-| --------------------------------------- | ------------------------------------------------------------------------------- |
-| Prisma Schema separado por arquivo      | Usa `prismaSchemaFolder` (Prisma 7 estável) — sem suporte em versões anteriores |
-| `updatedAt` gerenciado pelo Prisma      | A entidade de domínio reflete o valor persistido, não calcula em memória        |
-| Audit via EventEmitter2 in-process      | Simples e suficiente para o escopo — em produção migraria para broker externo   |
-| Sem paginação nos endpoints de listagem | Fora do escopo do desafio — adicionaria `cursor-based pagination` em produção   |
-| Testes de integração com banco real     | Requer banco rodando — em CI usa service container PostgreSQL                   |
-| ECS Fargate sem auto-scaling            | `desired_count=1` — em produção configuraria auto-scaling por CPU/memória       |
-| /metrics via Fastify raw                | Necessário para compatibilidade com URI versioning — bypassa middleware NestJS  |
 
 ---
 
