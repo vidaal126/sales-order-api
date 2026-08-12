@@ -1,6 +1,6 @@
 import type { CustomerEntity } from '@domain/entities/customer.entity';
+import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
 import { ICustomerRepository } from '@domain/repositories/customer.repository';
-import { DomainNotFoundException } from '@infrastructure/http/exceptions/not-found.exception';
 import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()

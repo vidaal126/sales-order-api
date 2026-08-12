@@ -1,3 +1,5 @@
-export abstract class IUnitOfWork {
-  abstract execute<T>(work: (tx: unknown) => Promise<T>): Promise<T>;
+export type TransactionContext = unknown;
+
+export interface IUnitOfWork {
+  execute<T>(work: (transaction: TransactionContext) => Promise<T>): Promise<T>;
 }

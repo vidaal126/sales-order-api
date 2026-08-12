@@ -1,11 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { OrderStatus } from '@domain/enums/order-status.enum';
-import { EVENT_EMITTER_PORT } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
 import { ICustomerRepository } from '@domain/repositories/customer.repository';
 import { IItemRepository } from '@domain/repositories/item.repository';
-import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
 import { PrismaService } from '@infrastructure/database/prisma/prisma.service';
+import { EVENT_EMITTER, SALES_ORDER_REPOSITORY } from '@infrastructure/di-tokens';
 import { CustomerRepository } from '@infrastructure/repositories/customer.repository';
 import { ItemRepository } from '@infrastructure/repositories/item.repository';
 import { SalesOrderRepository } from '@infrastructure/repositories/sales-order.repository';
@@ -30,8 +29,8 @@ describe('CreateSalesOrderUseCase - Integration', (): void => {
         PrismaService,
         { provide: ICustomerRepository, useClass: CustomerRepository },
         { provide: IItemRepository, useClass: ItemRepository },
-        { provide: ISalesOrderRepository, useClass: SalesOrderRepository },
-        { provide: EVENT_EMITTER_PORT, useExisting: EventEmitter2 },
+        { provide: SALES_ORDER_REPOSITORY, useClass: SalesOrderRepository },
+        { provide: EVENT_EMITTER, useExisting: EventEmitter2 },
         CreateSalesOrderUseCase,
       ],
     }).compile();

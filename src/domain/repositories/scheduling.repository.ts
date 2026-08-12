@@ -1,10 +1,11 @@
-import type { SchedulingEntity } from '@domain/entities/scheduling.entity';
+import { SchedulingEntity } from '@domain/entities/scheduling.entity';
+import type { TransactionContext } from '@domain/ports/unit-of-work.port';
 
-export abstract class ISchedulingRepository {
-  abstract create(scheduling: SchedulingEntity, tx?: unknown): Promise<SchedulingEntity>;
-  abstract findBySalesOrderId(
+export interface ISchedulingRepository {
+  findBySalesOrderId(
     salesOrderId: string,
-    tx?: unknown,
+    transaction?: TransactionContext,
   ): Promise<SchedulingEntity | undefined>;
-  abstract update(scheduling: SchedulingEntity, tx?: unknown): Promise<SchedulingEntity>;
+  create(scheduling: SchedulingEntity, transaction?: TransactionContext): Promise<SchedulingEntity>;
+  update(scheduling: SchedulingEntity, transaction?: TransactionContext): Promise<SchedulingEntity>;
 }

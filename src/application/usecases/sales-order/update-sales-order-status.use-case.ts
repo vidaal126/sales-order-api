@@ -1,10 +1,10 @@
 import type { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import type { OrderStatus } from '@domain/enums/order-status.enum';
 import type { IEventEmitter } from '@domain/events/event-emitter.port';
-import { EVENT_EMITTER_PORT } from '@domain/events/event-emitter.port';
-import { IUnitOfWork } from '@domain/ports/unit-of-work.port';
-import { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
-import { DomainNotFoundException } from '@infrastructure/http/exceptions/not-found.exception';
+import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
+import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
+import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
+import { EVENT_EMITTER, SALES_ORDER_REPOSITORY, UNIT_OF_WORK } from '@infrastructure/di-tokens';
 import { Inject, Injectable } from '@nestjs/common';
 
 export interface UpdateSalesOrderStatusInput {
@@ -15,11 +15,11 @@ export interface UpdateSalesOrderStatusInput {
 @Injectable()
 export class UpdateSalesOrderStatusUseCase {
   constructor(
-    @Inject(ISalesOrderRepository)
+    @Inject(SALES_ORDER_REPOSITORY)
     private readonly salesOrderRepository: ISalesOrderRepository,
-    @Inject(EVENT_EMITTER_PORT)
+    @Inject(EVENT_EMITTER)
     private readonly eventEmitter: IEventEmitter,
-    @Inject(IUnitOfWork)
+    @Inject(UNIT_OF_WORK)
     private readonly unitOfWork: IUnitOfWork,
   ) {}
 
