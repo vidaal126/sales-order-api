@@ -5,16 +5,16 @@ import type { TransportTypeEntity } from '@domain/entities/transport-type.entity
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
-  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
   ApiTooManyRequestsResponse,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { ApiStandardResponse } from '@presentation/dtos/common/api-standard-response.decorator';
 import { CreateTransportTypeDto } from '@presentation/dtos/transport-type/create-transport-type.dto';
+import { TransportTypeResponseDto } from '@presentation/dtos/transport-type/transport-type-response.dto';
 import { UpdateTransportTypeDto } from '@presentation/dtos/transport-type/update-transport-type.dto';
 
 @ApiTags('Transport Types')
@@ -34,7 +34,10 @@ export class TransportTypesController {
     summary: 'Criar tipo de transporte',
     description: 'O nome é único entre todos os tipos de transporte.',
   })
-  @ApiCreatedResponse({ description: 'Tipo de transporte criado.' })
+  @ApiStandardResponse(TransportTypeResponseDto, {
+    status: 201,
+    description: 'Tipo de transporte criado.',
+  })
   @ApiUnprocessableEntityResponse({ description: 'Já existe um tipo de transporte com esse nome.' })
   async create(@Body() dto: CreateTransportTypeDto): Promise<TransportTypeEntity> {
     return this.createTransportTypeUseCase.execute({
@@ -49,7 +52,10 @@ export class TransportTypesController {
     description: 'Campos omitidos preservam o valor atual.',
   })
   @ApiParam({ name: 'id', description: 'UUID do tipo de transporte.' })
-  @ApiOkResponse({ description: 'Tipo de transporte atualizado.' })
+  @ApiStandardResponse(TransportTypeResponseDto, {
+    status: 200,
+    description: 'Tipo de transporte atualizado.',
+  })
   @ApiUnprocessableEntityResponse({
     description: 'Tipo de transporte não encontrado ou nome já usado por outro registro.',
   })
@@ -66,7 +72,11 @@ export class TransportTypesController {
 
   @Get()
   @ApiOperation({ summary: 'Listar tipos de transporte' })
-  @ApiOkResponse({ description: 'Lista de tipos de transporte.' })
+  @ApiStandardResponse(TransportTypeResponseDto, {
+    status: 200,
+    description: 'Lista de tipos de transporte.',
+    isArray: true,
+  })
   async findAll(): Promise<TransportTypeEntity[]> {
     return this.getTransportTypesUseCase.execute();
   }

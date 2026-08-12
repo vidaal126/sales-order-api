@@ -10,21 +10,22 @@ import type { SchedulingEntity } from '@domain/entities/scheduling.entity';
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
-  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
   ApiTooManyRequestsResponse,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { ApiStandardResponse } from '@presentation/dtos/common/api-standard-response.decorator';
 import { ChangeSalesOrderTransportDto } from '@presentation/dtos/sales-order/change-sales-order-transport.dto';
 import { CreateSalesOrderDto } from '@presentation/dtos/sales-order/create-sales-order.dto';
 import { GetSalesOrdersQueryDto } from '@presentation/dtos/sales-order/get-sales-orders-query.dto';
 import { RescheduleDeliveryDto } from '@presentation/dtos/sales-order/reschedule-delivery.dto';
+import { SalesOrderResponseDto } from '@presentation/dtos/sales-order/sales-order-response.dto';
 import { ScheduleDeliveryDto } from '@presentation/dtos/sales-order/schedule-delivery.dto';
+import { SchedulingResponseDto } from '@presentation/dtos/sales-order/scheduling-response.dto';
 import { UpdateSalesOrderStatusDto } from '@presentation/dtos/sales-order/update-sales-order-status.dto';
 
 @ApiTags('Sales Orders')
@@ -49,7 +50,10 @@ export class SalesOrdersController {
     description:
       'A ordem nasce no status CRIADA e exige ao menos um item, sem itens repetidos. O tipo de transporte precisa estar autorizado para o cliente. Cliente, itens e ordem são lidos e gravados na mesma transação; o evento `order.created` só é emitido após o commit.',
   })
-  @ApiCreatedResponse({ description: 'Ordem de venda criada com status CRIADA.' })
+  @ApiStandardResponse(SalesOrderResponseDto, {
+    status: 201,
+    description: 'Ordem de venda criada com status CRIADA.',
+  })
   @ApiUnprocessableEntityResponse({
     description:
       'Cliente ou item inexistente, item repetido no pedido, ou transporte não autorizado para o cliente.',
@@ -72,7 +76,11 @@ export class SalesOrdersController {
     description:
       'Todos os filtros são opcionais e combináveis. `dateFrom`/`dateTo` filtram pela data de criação e `dateTo` não pode ser anterior a `dateFrom`. Paginado: sem `limit`, retorna 50 registros; o máximo permitido é 100.',
   })
-  @ApiOkResponse({ description: 'Página de ordens de venda que atendem aos filtros.' })
+  @ApiStandardResponse(SalesOrderResponseDto, {
+    status: 200,
+    description: 'Página de ordens de venda que atendem aos filtros.',
+    isArray: true,
+  })
   async findAll(@Query() query: GetSalesOrdersQueryDto): Promise<SalesOrderEntity[]> {
     return this.getSalesOrdersUseCase.execute({
       status: query.status,
@@ -92,7 +100,10 @@ export class SalesOrdersController {
     description: 'Retorna a ordem com seus itens e o agendamento associado, quando houver.',
   })
   @ApiParam({ name: 'id', description: 'UUID da ordem de venda.' })
-  @ApiOkResponse({ description: 'Ordem de venda encontrada.' })
+  @ApiStandardResponse(SalesOrderResponseDto, {
+    status: 200,
+    description: 'Ordem de venda encontrada.',
+  })
   @ApiNotFoundResponse({ description: 'Ordem de venda não encontrada.' })
   async findById(@Param('id') id: string): Promise<SalesOrderEntity> {
     return this.getSalesOrderByIdUseCase.execute(id);
@@ -105,7 +116,7 @@ export class SalesOrdersController {
       'Avança um único passo na máquina de estados: CRIADA → PLANEJADA → AGENDADA → EM_TRANSPORTE → ENTREGUE. Saltos, retrocessos e transições a partir de ENTREGUE são rejeitados. Emite `order.status.changed` para a auditoria.',
   })
   @ApiParam({ name: 'id', description: 'UUID da ordem de venda.' })
-  @ApiOkResponse({ description: 'Status atualizado.' })
+  @ApiStandardResponse(SalesOrderResponseDto, { status: 200, description: 'Status atualizado.' })
   @ApiNotFoundResponse({ description: 'Ordem de venda não encontrada.' })
   @ApiUnprocessableEntityResponse({
     description: 'Transição de status inválida a partir do status atual.',
@@ -127,7 +138,10 @@ export class SalesOrdersController {
       'Só é permitido para ordens em PLANEJADA e sem agendamento anterior; em caso de sucesso a ordem passa para AGENDADA. A janela precisa começar no futuro, terminar depois de começar, ocorrer no mesmo dia (UTC) de `deliveryDate`, e `deliveryDate` não pode exceder 365 dias a partir de agora.',
   })
   @ApiParam({ name: 'id', description: 'UUID da ordem de venda.' })
-  @ApiCreatedResponse({ description: 'Entrega agendada e ordem movida para AGENDADA.' })
+  @ApiStandardResponse(SchedulingResponseDto, {
+    status: 201,
+    description: 'Entrega agendada e ordem movida para AGENDADA.',
+  })
   @ApiNotFoundResponse({ description: 'Ordem de venda não encontrada.' })
   @ApiUnprocessableEntityResponse({
     description:
@@ -152,7 +166,10 @@ export class SalesOrdersController {
       'Só é permitido para ordens em AGENDADA que já possuam agendamento — ordens EM_TRANSPORTE ou ENTREGUE não podem ter a data alterada. A nova janela passa pelas mesmas validações do agendamento.',
   })
   @ApiParam({ name: 'id', description: 'UUID da ordem de venda.' })
-  @ApiOkResponse({ description: 'Entrega reagendada.' })
+  @ApiStandardResponse(SchedulingResponseDto, {
+    status: 200,
+    description: 'Entrega reagendada.',
+  })
   @ApiNotFoundResponse({ description: 'Ordem de venda ou agendamento não encontrado.' })
   @ApiUnprocessableEntityResponse({
     description: 'Ordem fora do status AGENDADA ou janela de entrega inválida.',
@@ -176,7 +193,10 @@ export class SalesOrdersController {
       'O novo tipo de transporte precisa estar autorizado para o cliente da ordem. Bloqueado para ordens em EM_TRANSPORTE ou ENTREGUE. Emite `order.transport.changed` para a auditoria.',
   })
   @ApiParam({ name: 'id', description: 'UUID da ordem de venda.' })
-  @ApiOkResponse({ description: 'Transporte da ordem alterado.' })
+  @ApiStandardResponse(SalesOrderResponseDto, {
+    status: 200,
+    description: 'Transporte da ordem alterado.',
+  })
   @ApiNotFoundResponse({ description: 'Ordem de venda ou cliente não encontrado.' })
   @ApiUnprocessableEntityResponse({
     description:

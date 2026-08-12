@@ -6,18 +6,18 @@ import type { CustomerEntity } from '@domain/entities/customer.entity';
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
-  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
   ApiTooManyRequestsResponse,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { ApiStandardResponse } from '@presentation/dtos/common/api-standard-response.decorator';
 import { PaginationQueryDto } from '@presentation/dtos/common/pagination-query.dto';
 import { CreateCustomerDto } from '@presentation/dtos/customer/create-customer.dto';
+import { CustomerResponseDto } from '@presentation/dtos/customer/customer-response.dto';
 import { UpdateCustomerDto } from '@presentation/dtos/customer/update-customer.dto';
 
 @ApiTags('Customers')
@@ -39,7 +39,7 @@ export class CustomersController {
     description:
       'CPF e telefone são normalizados automaticamente (aceitos com ou sem máscara) e o CPF é validado por dígito verificador. Todos os `authorizedTransportTypeIds` devem existir.',
   })
-  @ApiCreatedResponse({ description: 'Cliente criado.' })
+  @ApiStandardResponse(CustomerResponseDto, { status: 201, description: 'Cliente criado.' })
   @ApiUnprocessableEntityResponse({
     description: 'Documento já cadastrado ou tipo de transporte inexistente.',
   })
@@ -60,7 +60,7 @@ export class CustomersController {
       'Campos omitidos preservam o valor atual. O documento (CPF) é imutável após a criação. Enviar `authorizedTransportTypeIds` substitui a lista inteira.',
   })
   @ApiParam({ name: 'id', description: 'UUID do cliente.' })
-  @ApiOkResponse({ description: 'Cliente atualizado.' })
+  @ApiStandardResponse(CustomerResponseDto, { status: 200, description: 'Cliente atualizado.' })
   @ApiUnprocessableEntityResponse({
     description: 'Cliente não encontrado ou tipo de transporte inexistente.',
   })
@@ -79,7 +79,11 @@ export class CustomersController {
     summary: 'Listar clientes',
     description: 'Paginado. Sem `limit`, retorna 50 registros; o máximo permitido é 100.',
   })
-  @ApiOkResponse({ description: 'Página de clientes.' })
+  @ApiStandardResponse(CustomerResponseDto, {
+    status: 200,
+    description: 'Página de clientes.',
+    isArray: true,
+  })
   async findAll(@Query() query: PaginationQueryDto): Promise<CustomerEntity[]> {
     return this.getCustomersUseCase.execute(query);
   }
@@ -87,7 +91,7 @@ export class CustomersController {
   @Get(':id')
   @ApiOperation({ summary: 'Buscar cliente por ID' })
   @ApiParam({ name: 'id', description: 'UUID do cliente.' })
-  @ApiOkResponse({ description: 'Cliente encontrado.' })
+  @ApiStandardResponse(CustomerResponseDto, { status: 200, description: 'Cliente encontrado.' })
   @ApiNotFoundResponse({ description: 'Cliente não encontrado.' })
   async findById(@Param('id') id: string): Promise<CustomerEntity> {
     return this.getCustomerByIdUseCase.execute(id);

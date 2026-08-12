@@ -4,16 +4,16 @@ import type { ItemEntity } from '@domain/entities/item.entity';
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
-  ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiTooManyRequestsResponse,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { ApiStandardResponse } from '@presentation/dtos/common/api-standard-response.decorator';
 import { PaginationQueryDto } from '@presentation/dtos/common/pagination-query.dto';
 import { CreateItemDto } from '@presentation/dtos/item/create-item.dto';
+import { ItemResponseDto } from '@presentation/dtos/item/item-response.dto';
 
 @ApiTags('Items')
 @ApiBadRequestResponse({ description: 'Payload ou query string inválidos (falha de validação).' })
@@ -32,7 +32,7 @@ export class ItemsController {
     description:
       'O SKU é único. `unitPrice` aceita no máximo 2 casas decimais e deve ser positivo.',
   })
-  @ApiCreatedResponse({ description: 'Item criado.' })
+  @ApiStandardResponse(ItemResponseDto, { status: 201, description: 'Item criado.' })
   @ApiUnprocessableEntityResponse({ description: 'Já existe um item com o mesmo SKU.' })
   async create(@Body() dto: CreateItemDto): Promise<ItemEntity> {
     return this.createItemUseCase.execute({
@@ -48,7 +48,11 @@ export class ItemsController {
     summary: 'Listar itens',
     description: 'Paginado. Sem `limit`, retorna 50 registros; o máximo permitido é 100.',
   })
-  @ApiOkResponse({ description: 'Página de itens.' })
+  @ApiStandardResponse(ItemResponseDto, {
+    status: 200,
+    description: 'Página de itens.',
+    isArray: true,
+  })
   async findAll(@Query() query: PaginationQueryDto): Promise<ItemEntity[]> {
     return this.getItemsUseCase.execute(query);
   }
