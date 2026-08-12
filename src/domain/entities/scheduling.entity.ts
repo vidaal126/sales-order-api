@@ -57,6 +57,14 @@ export class SchedulingEntity extends BaseEntity {
   }): void {
     const now = input.now ?? new Date();
 
+    if (
+      Number.isNaN(input.deliveryDate.getTime()) ||
+      Number.isNaN(input.windowStart.getTime()) ||
+      Number.isNaN(input.windowEnd.getTime())
+    ) {
+      throw new DomainException('Data de entrega ou janela de atendimento inválida.');
+    }
+
     if (input.windowStart >= input.windowEnd) {
       throw new DomainException('Janela de atendimento inválida: início deve ser anterior ao fim.');
     }
