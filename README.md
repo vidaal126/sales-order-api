@@ -21,6 +21,8 @@ API RESTful para gerenciamento do ciclo completo de Ordens de Venda — do cadas
 - [Infraestrutura AWS](#infraestrutura-aws-terraform)
 - [Escalabilidade e Performance](#escalabilidade-e-performance)
 
+> Para o desenho detalhado da arquitetura atual, os contextos delimitados e o caminho de decomposição em microserviços, veja **[ARCHITECTURE.md](./ARCHITECTURE.md)**.
+
 ---
 
 ## Sobre o Projeto
