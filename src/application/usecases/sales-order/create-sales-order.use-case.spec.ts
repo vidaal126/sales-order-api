@@ -3,11 +3,11 @@ import { ItemEntity } from '@domain/entities/item.entity';
 import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
-import type { IEventEmitter } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
 import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
 import type { ICustomerRepository } from '@domain/repositories/customer.repository';
 import type { IItemRepository } from '@domain/repositories/item.repository';
+import type { IOutboxRepository } from '@domain/repositories/outbox.repository';
 import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CreateSalesOrderUseCase } from './create-sales-order.use-case';
@@ -35,8 +35,10 @@ const mockSalesOrderRepository: ISalesOrderRepository = {
   update: vi.fn(),
 };
 
-const mockEventEmitter: IEventEmitter = {
-  emit: vi.fn(),
+const mockOutboxRepository: IOutboxRepository = {
+  enqueue: vi.fn(),
+  findUnpublished: vi.fn(),
+  markPublished: vi.fn(),
 };
 
 const mockUnitOfWork: IUnitOfWork = {
@@ -82,7 +84,7 @@ describe('CreateSalesOrderUseCase', (): void => {
       mockSalesOrderRepository,
       mockCustomerRepository,
       mockItemRepository,
-      mockEventEmitter,
+      mockOutboxRepository,
       mockUnitOfWork,
     );
   });
@@ -136,6 +138,10 @@ describe('CreateSalesOrderUseCase', (): void => {
     });
 
     expect(mockSalesOrderRepository.create).toHaveBeenCalledOnce();
-    expect(mockEventEmitter.emit).toHaveBeenCalledWith('order.created', expect.any(Object));
+    expect(mockOutboxRepository.enqueue).toHaveBeenCalledWith(
+      'order.created',
+      expect.any(Object),
+      expect.anything(),
+    );
   });
 });

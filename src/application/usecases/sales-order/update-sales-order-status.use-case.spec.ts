@@ -1,10 +1,10 @@
 import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
-import type { IEventEmitter } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
 import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
 import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
+import type { IOutboxRepository } from '@domain/repositories/outbox.repository';
 import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UpdateSalesOrderStatusUseCase } from './update-sales-order-status.use-case';
@@ -16,8 +16,10 @@ const mockSalesOrderRepository: ISalesOrderRepository = {
   update: vi.fn(),
 };
 
-const mockEventEmitter: IEventEmitter = {
-  emit: vi.fn(),
+const mockOutboxRepository: IOutboxRepository = {
+  enqueue: vi.fn(),
+  findUnpublished: vi.fn(),
+  markPublished: vi.fn(),
 };
 
 const mockUnitOfWork: IUnitOfWork = {
@@ -42,7 +44,7 @@ describe('UpdateSalesOrderStatusUseCase', (): void => {
     vi.clearAllMocks();
     useCase = new UpdateSalesOrderStatusUseCase(
       mockSalesOrderRepository,
-      mockEventEmitter,
+      mockOutboxRepository,
       mockUnitOfWork,
     );
   });
@@ -62,7 +64,7 @@ describe('UpdateSalesOrderStatusUseCase', (): void => {
       useCase.execute({ orderId: 'order-id', newStatus: OrderStatus.ENTREGUE }),
     ).rejects.toThrow(DomainException);
     expect(mockSalesOrderRepository.update).not.toHaveBeenCalled();
-    expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+    expect(mockOutboxRepository.enqueue).not.toHaveBeenCalled();
   });
 
   it('should throw DomainException when advancing past ENTREGUE', async (): Promise<void> => {
@@ -83,10 +85,14 @@ describe('UpdateSalesOrderStatusUseCase', (): void => {
     const result = await useCase.execute({ orderId: 'order-id', newStatus: OrderStatus.PLANEJADA });
 
     expect(result.status).toBe(OrderStatus.PLANEJADA);
-    expect(mockEventEmitter.emit).toHaveBeenCalledWith('order.status.changed', {
-      orderId: 'order-id',
-      previousStatus: OrderStatus.CRIADA,
-      currentStatus: OrderStatus.PLANEJADA,
-    });
+    expect(mockOutboxRepository.enqueue).toHaveBeenCalledWith(
+      'order.status.changed',
+      {
+        orderId: 'order-id',
+        previousStatus: OrderStatus.CRIADA,
+        currentStatus: OrderStatus.PLANEJADA,
+      },
+      expect.anything(),
+    );
   });
 });

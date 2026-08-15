@@ -2,10 +2,10 @@ import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { SchedulingEntity } from '@domain/entities/scheduling.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
-import type { IEventEmitter } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
 import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
 import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
+import type { IOutboxRepository } from '@domain/repositories/outbox.repository';
 import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
 import type { ISchedulingRepository } from '@domain/repositories/scheduling.repository';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -24,8 +24,10 @@ const mockSchedulingRepository: ISchedulingRepository = {
   update: vi.fn(),
 };
 
-const mockEventEmitter: IEventEmitter = {
-  emit: vi.fn(),
+const mockOutboxRepository: IOutboxRepository = {
+  enqueue: vi.fn(),
+  findUnpublished: vi.fn(),
+  markPublished: vi.fn(),
 };
 
 const mockUnitOfWork: IUnitOfWork = {
@@ -75,7 +77,7 @@ describe('RescheduleDeliveryUseCase', (): void => {
     useCase = new RescheduleDeliveryUseCase(
       mockSalesOrderRepository,
       mockSchedulingRepository,
-      mockEventEmitter,
+      mockOutboxRepository,
       mockUnitOfWork,
     );
   });
@@ -159,10 +161,14 @@ describe('RescheduleDeliveryUseCase', (): void => {
     const result = await useCase.execute({ salesOrderId: 'order-id', ...window });
 
     expect(result.deliveryDate).toEqual(window.deliveryDate);
-    expect(mockEventEmitter.emit).toHaveBeenCalledWith('order.delivery.rescheduled', {
-      orderId: 'order-id',
-      previousDate: existingScheduling.deliveryDate,
-      newDate: window.deliveryDate,
-    });
+    expect(mockOutboxRepository.enqueue).toHaveBeenCalledWith(
+      'order.delivery.rescheduled',
+      {
+        orderId: 'order-id',
+        previousDate: existingScheduling.deliveryDate,
+        newDate: window.deliveryDate,
+      },
+      expect.anything(),
+    );
   });
 });

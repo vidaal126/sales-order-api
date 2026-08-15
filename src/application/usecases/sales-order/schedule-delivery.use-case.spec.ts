@@ -2,10 +2,10 @@ import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { SchedulingEntity } from '@domain/entities/scheduling.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
-import type { IEventEmitter } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
 import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
 import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
+import type { IOutboxRepository } from '@domain/repositories/outbox.repository';
 import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
 import type { ISchedulingRepository } from '@domain/repositories/scheduling.repository';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -24,8 +24,10 @@ const mockSchedulingRepository: ISchedulingRepository = {
   update: vi.fn(),
 };
 
-const mockEventEmitter: IEventEmitter = {
-  emit: vi.fn(),
+const mockOutboxRepository: IOutboxRepository = {
+  enqueue: vi.fn(),
+  findUnpublished: vi.fn(),
+  markPublished: vi.fn(),
 };
 
 const mockUnitOfWork: IUnitOfWork = {
@@ -69,7 +71,7 @@ describe('ScheduleDeliveryUseCase', (): void => {
     useCase = new ScheduleDeliveryUseCase(
       mockSalesOrderRepository,
       mockSchedulingRepository,
-      mockEventEmitter,
+      mockOutboxRepository,
       mockUnitOfWork,
     );
   });
@@ -194,9 +196,10 @@ describe('ScheduleDeliveryUseCase', (): void => {
     expect(order.status).toBe(OrderStatus.AGENDADA);
     expect(mockSchedulingRepository.create).toHaveBeenCalledOnce();
     expect(mockSalesOrderRepository.update).toHaveBeenCalledOnce();
-    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+    expect(mockOutboxRepository.enqueue).toHaveBeenCalledWith(
       'order.delivery.scheduled',
       expect.objectContaining({ orderId: 'order-id' }),
+      expect.anything(),
     );
   });
 });
