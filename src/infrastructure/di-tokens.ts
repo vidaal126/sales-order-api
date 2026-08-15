@@ -18,3 +18,4 @@ export const AUDIT_LOG_REPOSITORY = Symbol('IAuditLogRepository');
 
 export const UNIT_OF_WORK = Symbol('IUnitOfWork');
 export const EVENT_EMITTER = Symbol('IEventEmitter');
+export const REDIS_CLIENT = Symbol('RedisClient');
