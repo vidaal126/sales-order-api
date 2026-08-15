@@ -7,9 +7,12 @@ import { ScheduleDeliveryUseCase } from '@application/usecases/sales-order/sched
 import { UpdateSalesOrderStatusUseCase } from '@application/usecases/sales-order/update-sales-order-status.use-case';
 import type { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import type { SchedulingEntity } from '@domain/entities/scheduling.entity';
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { IdempotencyInterceptor } from '@infrastructure/http/interceptors/idempotency.interceptor';
+import { Body, Controller, Get, Param, Post, Put, Query, UseInterceptors } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiHeader,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
@@ -45,10 +48,16 @@ export class SalesOrdersController {
   ) {}
 
   @Post()
+  @UseInterceptors(IdempotencyInterceptor)
   @ApiOperation({
     summary: 'Criar ordem de venda',
     description:
-      'A ordem nasce no status CRIADA e exige ao menos um item, sem itens repetidos. O tipo de transporte precisa estar autorizado para o cliente. Cliente, itens e ordem são lidos e gravados na mesma transação; o evento `order.created` só é emitido após o commit.',
+      'A ordem nasce no status CRIADA e exige ao menos um item, sem itens repetidos. O tipo de transporte precisa estar autorizado para o cliente. Cliente, itens, ordem e o evento `order.created` (via outbox) são gravados na mesma transação. Envie `Idempotency-Key` para tornar retries seguros: a mesma chave retorna a resposta original em vez de criar uma nova ordem.',
+  })
+  @ApiHeader({
+    name: 'Idempotency-Key',
+    required: false,
+    description: 'Chave única do cliente para tornar retries desta requisição seguros.',
   })
   @ApiStandardResponse(SalesOrderResponseDto, {
     status: 201,
@@ -57,6 +66,9 @@ export class SalesOrdersController {
   @ApiUnprocessableEntityResponse({
     description:
       'Cliente ou item inexistente, item repetido no pedido, ou transporte não autorizado para o cliente.',
+  })
+  @ApiConflictResponse({
+    description: 'Já existe uma requisição em processamento para a mesma Idempotency-Key.',
   })
   async create(@Body() dto: CreateSalesOrderDto): Promise<SalesOrderEntity> {
     return this.createSalesOrderUseCase.execute({
