@@ -19,3 +19,4 @@ export const OUTBOX_REPOSITORY = Symbol('IOutboxRepository');
 
 export const UNIT_OF_WORK = Symbol('IUnitOfWork');
 export const EVENT_EMITTER = Symbol('IEventEmitter');
+export const REDIS_CLIENT = Symbol('RedisClient');

@@ -14,6 +14,7 @@ import {
   SALES_ORDER_REPOSITORY,
   SCHEDULING_REPOSITORY,
 } from '@infrastructure/di-tokens';
+import { IdempotencyInterceptor } from '@infrastructure/http/interceptors/idempotency.interceptor';
 import { AuditLogRepository } from '@infrastructure/repositories/audit-log.repository';
 import { CustomerRepository } from '@infrastructure/repositories/customer.repository';
 import { ItemRepository } from '@infrastructure/repositories/item.repository';
@@ -39,6 +40,7 @@ import { SalesOrdersController } from '@presentation/controllers/v1/sales-orders
     { provide: EVENT_EMITTER, useExisting: EventEmitter2 },
     AuditListener,
     OutboxPublisherService,
+    IdempotencyInterceptor,
     CreateSalesOrderUseCase,
     UpdateSalesOrderStatusUseCase,
     GetSalesOrdersUseCase,
