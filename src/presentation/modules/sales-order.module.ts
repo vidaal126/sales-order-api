@@ -10,6 +10,7 @@ import {
   CUSTOMER_REPOSITORY,
   EVENT_EMITTER,
   ITEM_REPOSITORY,
+  OUTBOX_REPOSITORY,
   SALES_ORDER_REPOSITORY,
   SCHEDULING_REPOSITORY,
 } from '@infrastructure/di-tokens';
@@ -17,9 +18,11 @@ import { IdempotencyInterceptor } from '@infrastructure/http/interceptors/idempo
 import { AuditLogRepository } from '@infrastructure/repositories/audit-log.repository';
 import { CustomerRepository } from '@infrastructure/repositories/customer.repository';
 import { ItemRepository } from '@infrastructure/repositories/item.repository';
+import { OutboxRepository } from '@infrastructure/repositories/outbox.repository';
 import { SalesOrderRepository } from '@infrastructure/repositories/sales-order.repository';
 import { SchedulingRepository } from '@infrastructure/repositories/scheduling.repository';
 import { AuditListener } from '@infrastructure/services/audit.listener';
+import { OutboxPublisherService } from '@infrastructure/services/outbox-publisher.service';
 import { Module } from '@nestjs/common';
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
 import { SalesOrdersController } from '@presentation/controllers/v1/sales-orders.controller';
@@ -33,8 +36,10 @@ import { SalesOrdersController } from '@presentation/controllers/v1/sales-orders
     { provide: ITEM_REPOSITORY, useClass: ItemRepository },
     { provide: SCHEDULING_REPOSITORY, useClass: SchedulingRepository },
     { provide: AUDIT_LOG_REPOSITORY, useClass: AuditLogRepository },
+    { provide: OUTBOX_REPOSITORY, useClass: OutboxRepository },
     { provide: EVENT_EMITTER, useExisting: EventEmitter2 },
     AuditListener,
+    OutboxPublisherService,
     IdempotencyInterceptor,
     CreateSalesOrderUseCase,
     UpdateSalesOrderStatusUseCase,

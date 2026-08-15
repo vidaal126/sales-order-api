@@ -15,6 +15,7 @@ export const CUSTOMER_REPOSITORY = Symbol('ICustomerRepository');
 export const ITEM_REPOSITORY = Symbol('IItemRepository');
 export const TRANSPORT_TYPE_REPOSITORY = Symbol('ITransportTypeRepository');
 export const AUDIT_LOG_REPOSITORY = Symbol('IAuditLogRepository');
+export const OUTBOX_REPOSITORY = Symbol('IOutboxRepository');
 
 export const UNIT_OF_WORK = Symbol('IUnitOfWork');
 export const EVENT_EMITTER = Symbol('IEventEmitter');

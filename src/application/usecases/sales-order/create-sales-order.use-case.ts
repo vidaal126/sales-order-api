@@ -2,16 +2,16 @@ import { randomUUID } from 'node:crypto';
 import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
-import type { IEventEmitter } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
 import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
 import type { ICustomerRepository } from '@domain/repositories/customer.repository';
 import type { IItemRepository } from '@domain/repositories/item.repository';
+import type { IOutboxRepository } from '@domain/repositories/outbox.repository';
 import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
 import {
   CUSTOMER_REPOSITORY,
-  EVENT_EMITTER,
   ITEM_REPOSITORY,
+  OUTBOX_REPOSITORY,
   SALES_ORDER_REPOSITORY,
   UNIT_OF_WORK,
 } from '@infrastructure/di-tokens';
@@ -36,14 +36,14 @@ export class CreateSalesOrderUseCase {
     private readonly customerRepository: ICustomerRepository,
     @Inject(ITEM_REPOSITORY)
     private readonly itemRepository: IItemRepository,
-    @Inject(EVENT_EMITTER)
-    private readonly eventEmitter: IEventEmitter,
+    @Inject(OUTBOX_REPOSITORY)
+    private readonly outboxRepository: IOutboxRepository,
     @Inject(UNIT_OF_WORK)
     private readonly unitOfWork: IUnitOfWork,
   ) {}
 
   async execute(input: CreateSalesOrderInput): Promise<SalesOrderEntity> {
-    const created = await this.unitOfWork.execute(async (tx): Promise<SalesOrderEntity> => {
+    return this.unitOfWork.execute(async (tx): Promise<SalesOrderEntity> => {
       const customer = await this.customerRepository.findById(input.customerId, tx);
       if (!customer) {
         throw new DomainException(`Cliente ${input.customerId} não encontrado.`);
@@ -93,15 +93,15 @@ export class CreateSalesOrderUseCase {
         items: orderItems,
       });
 
-      return this.salesOrderRepository.create(order, tx);
-    });
+      const created = await this.salesOrderRepository.create(order, tx);
 
-    this.eventEmitter.emit('order.created', {
-      orderId: created.id,
-      customerId: created.customerId,
-      status: created.status,
-    });
+      await this.outboxRepository.enqueue(
+        'order.created',
+        { orderId: created.id, customerId: created.customerId, status: created.status },
+        tx,
+      );
 
-    return created;
+      return created;
+    });
   }
 }

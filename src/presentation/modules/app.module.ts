@@ -3,6 +3,7 @@ import { Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import type { LevelWithSilent } from 'pino';
@@ -66,6 +67,7 @@ import { TransportTypeModule } from './transport-type.module';
     }),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 30 }]),
     EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     SharedModule,
     MetricsModule,
     CustomerModule,

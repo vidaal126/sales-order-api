@@ -5,16 +5,16 @@ import { PrismaService } from '@infrastructure/database/prisma/prisma.service';
 import { PrismaUnitOfWork } from '@infrastructure/database/prisma/prisma-unit-of-work';
 import {
   CUSTOMER_REPOSITORY,
-  EVENT_EMITTER,
   ITEM_REPOSITORY,
+  OUTBOX_REPOSITORY,
   SALES_ORDER_REPOSITORY,
   UNIT_OF_WORK,
 } from '@infrastructure/di-tokens';
 import { CustomerRepository } from '@infrastructure/repositories/customer.repository';
 import { ItemRepository } from '@infrastructure/repositories/item.repository';
+import { OutboxRepository } from '@infrastructure/repositories/outbox.repository';
 import { SalesOrderRepository } from '@infrastructure/repositories/sales-order.repository';
 import { ConfigModule } from '@nestjs/config';
-import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { CreateSalesOrderUseCase } from './create-sales-order.use-case';
@@ -43,14 +43,14 @@ describe('CreateSalesOrderUseCase - Integration', (): void => {
 
   beforeAll(async (): Promise<void> => {
     module = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({ isGlobal: true }), EventEmitterModule.forRoot()],
+      imports: [ConfigModule.forRoot({ isGlobal: true })],
       providers: [
         PrismaService,
         { provide: CUSTOMER_REPOSITORY, useClass: CustomerRepository },
         { provide: ITEM_REPOSITORY, useClass: ItemRepository },
         { provide: SALES_ORDER_REPOSITORY, useClass: SalesOrderRepository },
+        { provide: OUTBOX_REPOSITORY, useClass: OutboxRepository },
         { provide: UNIT_OF_WORK, useClass: PrismaUnitOfWork },
-        { provide: EVENT_EMITTER, useExisting: EventEmitter2 },
         CreateSalesOrderUseCase,
       ],
     }).compile();
@@ -82,6 +82,9 @@ describe('CreateSalesOrderUseCase - Integration', (): void => {
 
   afterAll(async (): Promise<void> => {
     if (!prisma) return;
+    await prisma.outboxEvent.deleteMany({
+      where: { eventName: 'order.created', payload: { path: ['customerId'], equals: customerId } },
+    });
     await prisma.salesOrderItem.deleteMany({ where: { itemId } });
     await prisma.salesOrder.deleteMany({ where: { customerId } });
     await prisma.item.delete({ where: { id: itemId } });

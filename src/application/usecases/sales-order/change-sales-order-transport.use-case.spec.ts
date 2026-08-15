@@ -2,11 +2,11 @@ import { CustomerEntity } from '@domain/entities/customer.entity';
 import { SalesOrderEntity } from '@domain/entities/sales-order.entity';
 import { SalesOrderItemEntity } from '@domain/entities/sales-order-item.entity';
 import { OrderStatus } from '@domain/enums/order-status.enum';
-import type { IEventEmitter } from '@domain/events/event-emitter.port';
 import { DomainException } from '@domain/exceptions/domain.exception';
 import { DomainNotFoundException } from '@domain/exceptions/domain-not-found.exception';
 import type { IUnitOfWork } from '@domain/ports/unit-of-work.port';
 import type { ICustomerRepository } from '@domain/repositories/customer.repository';
+import type { IOutboxRepository } from '@domain/repositories/outbox.repository';
 import type { ISalesOrderRepository } from '@domain/repositories/sales-order.repository';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ChangeSalesOrderTransportUseCase } from './change-sales-order-transport.use-case';
@@ -26,8 +26,10 @@ const mockCustomerRepository: ICustomerRepository = {
   update: vi.fn(),
 };
 
-const mockEventEmitter: IEventEmitter = {
-  emit: vi.fn(),
+const mockOutboxRepository: IOutboxRepository = {
+  enqueue: vi.fn(),
+  findUnpublished: vi.fn(),
+  markPublished: vi.fn(),
 };
 
 const mockUnitOfWork: IUnitOfWork = {
@@ -63,7 +65,7 @@ describe('ChangeSalesOrderTransportUseCase', (): void => {
     useCase = new ChangeSalesOrderTransportUseCase(
       mockSalesOrderRepository,
       mockCustomerRepository,
-      mockEventEmitter,
+      mockOutboxRepository,
       mockUnitOfWork,
     );
   });
@@ -128,10 +130,14 @@ describe('ChangeSalesOrderTransportUseCase', (): void => {
     });
 
     expect(result.transportTypeId).toBe('new-transport-id');
-    expect(mockEventEmitter.emit).toHaveBeenCalledWith('order.transport.changed', {
-      orderId: 'order-id',
-      previousTransportTypeId: 'old-transport-id',
-      currentTransportTypeId: 'new-transport-id',
-    });
+    expect(mockOutboxRepository.enqueue).toHaveBeenCalledWith(
+      'order.transport.changed',
+      {
+        orderId: 'order-id',
+        previousTransportTypeId: 'old-transport-id',
+        currentTransportTypeId: 'new-transport-id',
+      },
+      expect.anything(),
+    );
   });
 });
